@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sns.socialmedia.mapper.UsersMapper">
+    <!-- 사용자 등록 -->
+    <insert id="insertUser" parameterType="User" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO users (USERNAME, EMAIL, PASSWORD, BIO, PROFILE_PICTURE, CREATED_AT)
+        VALUES (#{username}, #{email}, #{password}, #{bio}, #{profilePicture}, NOW())
+    </insert>
+
+    <!-- username으로 사용자 조회 -->
+    <select id="findByUsername" parameterType="string" resultType="User">
+        SELECT USERNAME, EMAIL, PASSWORD, BIO, PROFILE_PICTURE, CREATED_AT FROM users WHERE USERNAME = #{username}
+    </select>
+
+    <!-- email로 사용자 조회 -->
+    <select id="findByEmail" parameterType="string" resultType="User">
+        SELECT * FROM users WHERE EMAIL = #{email}
+    </select>
+
+    <!-- 사용자 정보 수정 -->
+    <update id="updateUser" parameterType="User">
+        UPDATE users SET
+                         USERNAME = #{username},
+                         EMAIL = #{email},
+                         PASSWORD = #{password},
+                         BIO = #{bio},
+                         PROFILE_PICTURE = #{profilePicture}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 사용자 삭제 -->
+    <delete id="deleteUser" parameterType="long">
+        DELETE FROM users WHERE id = #{id}
+    </delete>
+
+    <!-- username 일부로 사용자 검색 -->
+    <select id="searchByUsername" parameterType="string" resultType="User">
+        SELECT * FROM users WHERE username LIKE CONCAT('%', #{keyword}, '%')
+    </select>
+</mapper>

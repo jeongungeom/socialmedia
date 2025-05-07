@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sns.socialmedia.mapper.PhotoTagsMapper">
+
+    <!-- 게시물-해시태그 연결 등록 -->
+    <insert id="insertPhotoTags">
+        /* 게시물에 해시태그 연결 등록 */
+        INSERT INTO photo_tags (PHOTO_ID, HASHTAG_ID)
+        VALUES (#{photoId}, #{hashtagId})
+    </insert>
+
+    <!-- 게시물-해시태그 연결 삭제 -->
+    <delete id="deletePhotoTags">
+        /* 게시물-해시태그 연결 삭제 */
+        DELETE FROM photo_tags WHERE PHOTO_ID = #{photoId} AND HASHTAG_ID = #{hashtagId}
+    </delete>
+
+    <!-- 게시물에 달린 해시태그 목록 조회 -->
+    <select id="findHashtagsByPhotoId" parameterType="long" resultType="Hashtags">
+        /* photo_id로 해당 게시물에 연결된 해시태그 목록 조회 */
+        SELECT h.* FROM hashtags h
+                            INNER JOIN photo_tags pt ON h.ID = pt.HASHTAG_ID
+        WHERE pt.PHOTO_ID = #{photoId}
+    </select>
+
+    <!-- 해시태그가 달린 게시물 목록 조회 -->
+    <select id="findPhotosByHashtagId" parameterType="long" resultType="Photos">
+        /* hashtag_id로 해당 해시태그가 달린 게시물 목록 조회 */
+        SELECT p.* FROM photos p
+                            INNER JOIN photo_tags pt ON p.ID = pt.PHOTO_ID
+        WHERE pt.HASHTAG_ID = #{hashtagId}
+    </select>
+
+</mapper>

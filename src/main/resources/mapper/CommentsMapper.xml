@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sns.socialmedia.mapper.CommentsMapper">
+
+    <!-- 댓글 등록 -->
+    <insert id="insertComments" parameterType="Comments" useGeneratedKeys="true" keyProperty="id">
+        /* 새 댓글 등록 */
+        INSERT INTO comments (USER_ID, PHOTO_ID, COMMENT_TEXT, CREATED_AT)
+        VALUES (#{userId}, #{photoId}, #{commentText}, #{createdAt})
+    </insert>
+
+    <!-- 게시물별 댓글 목록 조회 -->
+    <select id="findByPostId" parameterType="long" resultType="Comments">
+        /* photo_id로 해당 게시물의 댓글 전체 조회 */
+        SELECT * FROM comments WHERE PHOTO_ID = #{postId}
+    </select>
+
+    <!-- 댓글 수정 -->
+    <update id="updateComments" parameterType="Comments">
+        /* 댓글 내용 수정 */
+        UPDATE comments
+        SET COMMENT_TEXT = #{commentText}
+        WHERE ID = #{id}
+    </update>
+
+    <!-- 댓글 삭제 -->
+    <delete id="deleteComments" parameterType="long">
+        /* 댓글 id로 삭제 */
+        DELETE FROM comments WHERE ID = #{id}
+    </delete>
+
+    <!-- 게시물별 댓글 개수 조회 -->
+    <select id="countByPostId" parameterType="long" resultType="int">
+        /* photo_id로 해당 게시물의 댓글 개수 조회 */
+        SELECT COUNT(*) FROM comments WHERE PHOTO_ID = #{postId}
+    </select>
+
+</mapper>

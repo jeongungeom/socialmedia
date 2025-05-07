@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sns.socialmedia.mapper.HashtagsMapper">
+
+    <!-- 해시태그 등록 -->
+    <insert id="insertHashtags" parameterType="Hashtags" useGeneratedKeys="true" keyProperty="id">
+        /* 새 해시태그 등록 */
+        INSERT INTO hashtags (NAME)
+        VALUES (#{name})
+    </insert>
+
+    <!-- 해시태그 ID로 조회 -->
+    <select id="findById" parameterType="long" resultType="Hashtags">
+        /* PK(id)로 해시태그 단건 조회 */
+        SELECT * FROM hashtags WHERE ID = #{id}
+    </select>
+
+    <!-- 해시태그 이름으로 조회 -->
+    <select id="findByName" parameterType="string" resultType="Hashtags">
+        /* name으로 해시태그 단건 조회 */
+        SELECT * FROM hashtags WHERE NAME = #{name}
+    </select>
+
+    <!-- 전체 해시태그 목록 조회 -->
+    <select id="findAll" resultType="Hashtags">
+        /* 전체 해시태그 리스트 조회 */
+        SELECT * FROM hashtags
+    </select>
+
+</mapper>

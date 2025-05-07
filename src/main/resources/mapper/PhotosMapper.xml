@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sns.socialmedia.mapper.PhotosMapper">
+
+    <!-- 게시물 등록 -->
+    <insert id="insertPhotos" parameterType="Photos" useGeneratedKeys="true" keyProperty="id">
+        /* 새 게시물(사진) 등록 */
+        INSERT INTO photos (USER_ID, IMAGE_URL, CAPTION, CREATED_AT)
+        VALUES (#{userId}, #{imageUrl}, #{caption}, #{createdAt})
+    </insert>
+
+    <!-- 특정 사용자의 게시물 목록 조회 -->
+    <select id="findByUserId" parameterType="long" resultType="Photos">
+        /* user_id로 해당 사용자의 게시물 전체 조회 */
+        SELECT * FROM photos WHERE USER_ID = #{userId}
+    </select>
+
+    <!-- 게시물 수정 -->
+    <update id="updatePhotos" parameterType="Photos">
+        /* 게시물(사진) 정보 수정 */
+        UPDATE photos
+        SET IMAGE_URL = #{imageUrl},
+            CAPTION = #{caption}
+        WHERE ID = #{id}
+    </update>
+
+    <!-- 게시물 삭제 -->
+    <delete id="deletePhotos" parameterType="long">
+        /* 게시물 id로 삭제 */
+        DELETE FROM photos WHERE ID = #{id}
+    </delete>
+
+
+</mapper>
