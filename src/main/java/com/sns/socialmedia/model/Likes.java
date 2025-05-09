@@ -14,5 +14,5 @@ import java.time.LocalDateTime;
 public class Likes {
     private long id;
     private long photoId;
-    private LocalDateTime createAt;
+    private LocalDateTime createdAt;
 }

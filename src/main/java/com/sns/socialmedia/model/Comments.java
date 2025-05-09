@@ -16,5 +16,5 @@ public class Comments {
     private String commentText;
     private long userId;
     private long photoId;
-    private LocalDateTime createAt;
+    private LocalDateTime createdAt;
 }

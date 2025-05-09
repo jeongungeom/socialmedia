@@ -3,23 +3,23 @@
 
 <mapper namespace="com.sns.socialmedia.mapper.UsersMapper">
     <!-- 사용자 등록 -->
-    <insert id="insertUser" parameterType="User" useGeneratedKeys="true" keyProperty="id">
+    <insert id="insertUser" parameterType="Users" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO users (USERNAME, EMAIL, PASSWORD, BIO, PROFILE_PICTURE, CREATED_AT)
         VALUES (#{username}, #{email}, #{password}, #{bio}, #{profilePicture}, NOW())
     </insert>
 
     <!-- username으로 사용자 조회 -->
-    <select id="findByUsername" parameterType="string" resultType="User">
+    <select id="findByUsername" parameterType="string" resultType="Users">
         SELECT USERNAME, EMAIL, PASSWORD, BIO, PROFILE_PICTURE, CREATED_AT FROM users WHERE USERNAME = #{username}
     </select>
 
     <!-- email로 사용자 조회 -->
-    <select id="findByEmail" parameterType="string" resultType="User">
+    <select id="findByEmail" parameterType="string" resultType="Users">
         SELECT * FROM users WHERE EMAIL = #{email}
     </select>
 
     <!-- 사용자 정보 수정 -->
-    <update id="updateUser" parameterType="User">
+    <update id="updateUser" parameterType="Users">
         UPDATE users SET
                          USERNAME = #{username},
                          EMAIL = #{email},
@@ -35,7 +35,7 @@
     </delete>
 
     <!-- username 일부로 사용자 검색 -->
-    <select id="searchByUsername" parameterType="string" resultType="User">
+    <select id="searchByUsername" parameterType="string" resultType="Users">
         SELECT * FROM users WHERE username LIKE CONCAT('%', #{keyword}, '%')
     </select>
 </mapper>

@@ -16,5 +16,5 @@ import java.time.LocalDateTime;
 public class Follows {
     private long follwerId;
     private long followingId;
-    private LocalDateTime createAt;
+    private LocalDateTime createdAt;
 }

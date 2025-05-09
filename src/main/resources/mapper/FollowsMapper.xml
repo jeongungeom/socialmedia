@@ -9,7 +9,7 @@
     <insert id="insertFollows" parameterType="Follows">
         /* 팔로우 관계 등록 */
         INSERT INTO follows (FOLLOWER_ID, FOLLOWING_ID, CREATED_AT)
-        VALUES (#{followerId}, #{followingId}, #{createdAt})
+        VALUES (#{followerId}, #{followingId}, NOW())
     </insert>
 
     <!-- 팔로우 취소 -->

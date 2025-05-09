@@ -18,5 +18,5 @@ public class Users {
     private String password;
     private String bio;
     private String profilePicture;
-    private LocalDateTime createAt;
+    private LocalDateTime createdAt;
 }

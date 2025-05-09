@@ -9,7 +9,7 @@
     <insert id="insertPhotos" parameterType="Photos" useGeneratedKeys="true" keyProperty="id">
         /* 새 게시물(사진) 등록 */
         INSERT INTO photos (USER_ID, IMAGE_URL, CAPTION, CREATED_AT)
-        VALUES (#{userId}, #{imageUrl}, #{caption}, #{createdAt})
+        VALUES (#{userId}, #{imageUrl}, #{caption}, NOW())
     </insert>
 
     <!-- 특정 사용자의 게시물 목록 조회 -->

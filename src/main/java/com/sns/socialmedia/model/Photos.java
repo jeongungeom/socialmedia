@@ -16,5 +16,5 @@ public class Photos {
     private long userId;
     private String imageUrl;
     private String caption;
-    private LocalDateTime createAt;
+    private LocalDateTime createdAt;
 }

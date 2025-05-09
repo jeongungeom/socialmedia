@@ -7,8 +7,8 @@ import java.util.List;
 
 @Mapper
 public interface FollowsMapper {
-    void insertFollow(Follows follow); // 팔로우 등록
-    void deleteFollow(Long followerId, Long followingId); // 팔로우 취소
+    int insertFollow(Follows follow); // 팔로우 등록
+    int deleteFollow(Long followerId, Long followingId); // 팔로우 취소
     boolean existsByFollowerIdAndFollowingId(Long followerId, Long followingId); // 팔로우 관계 존재 여부 확인
     int countByFollowerId(Long followerId); // 팔로잉 수 조회
     int countByFollowingId(Long followingId); // 팔로워 수 조회
