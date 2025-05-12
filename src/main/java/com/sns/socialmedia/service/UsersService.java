@@ -1,6 +1,7 @@
 package com.sns.socialmedia.service;
 
 
+import com.sns.socialmedia.exception.DuplicateUserException;
 import com.sns.socialmedia.mapper.UsersMapper;
 import com.sns.socialmedia.model.Users;
 import lombok.RequiredArgsConstructor;
@@ -15,8 +16,11 @@ public class UsersService {
     private final UsersMapper usersMapper;
 
     // 회원가입
-    public int insertUser(Users users) {
-        return usersMapper.insertUser(users);
+    public void checkValid(Users users) {
+        if(usersMapper.findByUsername(users.getUsername()).isPresent()) {
+            throw new DuplicateUserException("중복된 아이디입니다.");
+        }
+        usersMapper.insertUser(users);
     }
 
     // 회원 정보 수정

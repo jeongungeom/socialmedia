@@ -1,0 +1,90 @@
+<template>
+  <div class="ig-login-bg d-flex align-items-center justify-content-center min-vh-100">
+    <div class="ig-login-card p-5 rounded-4">
+      <!-- 로고 -->
+      <div class="text-center mb-4">
+        <i class="bi bi-instagram" style="font-size:3.5rem; color:#e1306c;"></i>
+        <h1 class="mt-2 ig-logo-text">Instagram</h1>
+      </div>
+
+      <!-- 로그인 폼 -->
+      <form @submit.prevent="handleLogin" class="mb-4">
+        <div class="form-floating mb-3">
+          <input
+              v-model="form.username"
+              type="text"
+              class="form-control"
+              placeholder="사용자 이름 or 혹은 이메일"
+              required
+          >
+          <label>사용자 이름 or 이메일</label>
+        </div>
+
+        <div class="form-floating mb-3">
+          <input
+              v-model="form.password"
+              type="password"
+              class="form-control"
+              placeholder="비밀번호"
+              required
+          >
+          <label>비밀번호</label>
+        </div>
+
+        <button class="btn btn-primary w-100 py-2 fw-bold">로그인</button>
+      </form>
+
+      <!-- 소셜 로그인 -->
+      <div class="text-center mb-4">
+          <span class="mx-3 text-muted">또는</span>
+      </div>
+
+      <!-- 회원가입 링크 -->
+      <div class="text-center">
+        <small class="text-muted">
+          계정이 없으신가요?
+          <a href="#" class="text-decoration-none" @click.prevent="register">가입하기</a>
+        </small>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { reactive } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+const form = reactive({
+  username: '',
+  password: ''
+})
+
+const handleLogin = () => {
+  // 실제 로그인 API 호출 로직 구현
+  router.push('/feed')
+}
+
+function register() {
+  router.push('/signUp')
+}
+</script>
+
+<style scoped>
+.ig-login-bg {
+  background: linear-gradient(135deg, #1a1a1a 0%, #121212 100%);
+  color: #eee;
+}
+.ig-login-card {
+  width: 100%;
+  max-width: 540px;      /* 기존 450px → 540px로 확대 */
+  padding: 3rem 2.5rem;  /* 상하 3rem, 좌우 2.5rem로 여백도 넉넉하게 */
+  background: rgba(30, 30, 30, 0.95);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ig-logo-text {
+  color: #fafafa;
+}
+</style>
