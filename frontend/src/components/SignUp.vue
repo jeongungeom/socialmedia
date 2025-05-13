@@ -6,7 +6,7 @@
         <input type="hidden" name="_csrf" :value="csrfToken" />
         <div class="mb-3">
           <label class="form-label text-white">아이디</label>
-          <input v-model="form.username" class="form-control" required />
+          <input v-model="form.username" @blur="validateUsername" class="form-control" required />
         </div>
         <div class="mb-3">
           <label class="form-label text-white">비밀번호</label>
@@ -14,7 +14,7 @@
         </div>
         <div class="mb-3">
           <label class="form-label text-white">이메일</label>
-          <input v-model="form.email" class="form-control" required />
+          <input v-model="form.email" @blur="validateEmail" class="form-control" required />
         </div>
         <button class="btn btn-primary w-100">회원가입</button>
       </form>
@@ -26,10 +26,11 @@
 </template>
 
 <script setup>
-import {onMounted, reactive, ref} from 'vue'
+import {reactive, ref} from 'vue'
 import api from '../api/axios.js'
+import {useRouter} from "vue-router";
 
-
+const router = useRouter();
 const form = reactive({
   username: '',
   password: '',
@@ -39,23 +40,68 @@ const msg = ref('')
 const success = ref(false)
 const csrfToken = ref('')
 
-onMounted(async () => {
-  console.log("mounted")
-  // const res = await api.get('/auth/csrf-token')
-  // csrfToken.value = res.data.token // 서버 응답 구조에 따라 다름
-})
+function validateUsername() {
+  const usernameValid = /^[a-zA-Z0-9_]+$/.test(form.username);
+
+  if (!usernameValid) {
+    msg.value = '아이디는 영어, 숫자, 언더바(_)만 입력 가능합니다.';
+    return false;
+  }
+  msg.value = '';
+  return true;
+}
+
+
+
+function validateEmail() {
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email);
+
+  if (!emailValid) {
+    msg.value = '이메일 형식에 맞게 입력해주세요.';
+    return false;
+  }
+
+  msg.value = '';
+  return true;
+}
+
 
 const onRegister = async () => {
   msg.value = ''
+  if(!validateUsername()) {
+    return false;
+  } else if(!validateEmail()) {
+    return false;
+  }
+
   try {
     await api.post('/auth/register', form)
-    msg.value = '회원가입 성공! 이제 로그인하세요.'
+
+    const loginRes = await api.post('/auth/login', {
+      username: form.username,
+      password: form.password
+    });
+
+    const token = loginRes.data.token; // 서버 응답 구조에 따라 조정
+    localStorage.setItem('jwt', token);
+
+    await router.push('/feed');
+
     success.value = true
+    alert('회원가입 완료되었습니다.')
   } catch (e) {
     msg.value = e.response?.data || '회원가입 실패!'
     success.value = false
   }
 }
+
+api.interceptors.request.use(config => {
+  const token = localStorage.getItem('jwt');
+  if (token) {
+    config.headers['Authorization'] = 'Bearer ' + token;
+  }
+  return config;
+});
 </script>
 
 <style scoped>

@@ -8,6 +8,11 @@
         VALUES (#{username}, #{email}, #{password}, #{bio}, #{profilePicture}, NOW())
     </insert>
 
+    <select id="Login" resultType="Users">
+        SELECT USERNAME, EMAIL, PASSWORD, BIO, PROFILE_PICTURE, CREATED_AT
+        FROM user WHERE id = #{username} AND password = #{password}
+    </select>
+
     <!-- username으로 사용자 조회 -->
     <select id="findByUsername" parameterType="string" resultType="Users">
         SELECT USERNAME, EMAIL, PASSWORD, BIO, PROFILE_PICTURE, CREATED_AT FROM users WHERE USERNAME = #{username}
@@ -15,7 +20,7 @@
 
     <!-- email로 사용자 조회 -->
     <select id="findByEmail" parameterType="string" resultType="Users">
-        SELECT * FROM users WHERE EMAIL = #{email}
+        SELECT USERNAME, EMAIL, PASSWORD, BIO, PROFILE_PICTURE, CREATED_AT FROM users WHERE EMAIL = #{email}
     </select>
 
     <!-- 사용자 정보 수정 -->

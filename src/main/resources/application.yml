@@ -26,3 +26,7 @@ logging:
     root: INFO
     com.sns.socialmedia: DEBUG
     org.springframework.security: DEBUG
+
+jwt:
+  secret: YzEyMzR0bXZxQzRmNTZ2cEFoUGVpMWdIajU3aWdoZ2g
+  expiration: 3600000

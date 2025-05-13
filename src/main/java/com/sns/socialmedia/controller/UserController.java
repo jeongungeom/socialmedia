@@ -26,10 +26,17 @@ public class UserController {
     }
 
 
+    // 회원가입
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody Users users) {
         log.debug("regsiter");
         usersService.checkValid(users);
         return ResponseEntity.ok("회원가입 성공");
+    }
+
+    // 로그인 (JWT 발급)
+    @PostMapping("/login")
+    public String login(@RequestBody Users user) {
+        return usersService.login(user.getUsername(), user.getPassword());
     }
 }

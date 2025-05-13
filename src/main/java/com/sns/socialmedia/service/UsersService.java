@@ -4,7 +4,10 @@ package com.sns.socialmedia.service;
 import com.sns.socialmedia.exception.DuplicateUserException;
 import com.sns.socialmedia.mapper.UsersMapper;
 import com.sns.socialmedia.model.Users;
+import com.sns.socialmedia.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,15 +16,40 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class UsersService {
-    private final UsersMapper usersMapper;
 
-    // 회원가입
+    @Autowired
+    private final UsersMapper usersMapper;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    @Autowired
+    private JwtUtil jwtUtil;
+
+    // 회원가입 및 아이디 중복 체크
     public void checkValid(Users users) {
         if(usersMapper.findByUsername(users.getUsername()).isPresent()) {
-            throw new DuplicateUserException("중복된 아이디입니다.");
+            throw new DuplicateUserException("이미 사용중인 아이디입니다.");
+        } else if (usersMapper.findByEmail(users.getEmail()).isPresent()) {
+            throw new DuplicateUserException("이미 사용중인 이메일입니다.");
         }
-        usersMapper.insertUser(users);
+        users.setPassword(passwordEncoder.encode(users.getPassword()));
+       usersMapper.insertUser(users);
     }
+
+    // 로그인 및 JWT 발급
+    public String login(String username, String rawPassword) {
+        // 1. Optional<User> 안전하게 해제
+        Users user = usersMapper.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("존재하지 않는 아이디입니다."));
+
+        // 비밀번호 비교
+        if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
+            throw new RuntimeException("비밀번호가 일치하지 않습니다.");
+        }
+
+        // JWT 발급
+        return jwtUtil.generateToken(user.getUsername());
+    }
+
 
     // 회원 정보 수정
     public int updateUser(Users users) {
@@ -38,7 +66,7 @@ public class UsersService {
         return usersMapper.findByUsername(username);
     }
 
-    // 이메일로 사용자 조회 (비밀번호 재설정 시 사용)
+    // 이메일로 사용자 조회
     public Optional<Users> findByEmail(String email) {
         return usersMapper.findByEmail(email);
     }

@@ -9,6 +9,7 @@ import java.util.Optional;
 @Mapper
 public interface UsersMapper {
     int insertUser(Users users); // 회원가입
+    Users Login(String username, String password); // 로그인
     int updateUser(Users users); // 정보 수정
     int deleteUser(Long id); // 삭제
     Optional<Users> findByUsername(String username); // username으로 사용자 조회
