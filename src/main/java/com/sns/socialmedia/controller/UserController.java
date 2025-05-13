@@ -18,14 +18,6 @@ import java.util.Map;
 public class UserController {
     private final UsersService usersService;
 
-
-    @GetMapping("/csrf-token")
-    public Map<String, String> getCsrfToken(HttpServletRequest request) {
-        CsrfToken csrfToken = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
-        return Map.of("token", csrfToken.getToken());
-    }
-
-
     // 회원가입
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody Users users) {

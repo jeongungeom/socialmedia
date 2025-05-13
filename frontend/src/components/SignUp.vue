@@ -1,9 +1,11 @@
 <template>
   <div class="register-bg d-flex align-items-center justify-content-center min-vh-100">
     <div class="register-card p-5 rounded-4">
+      <button @click="goBack" type="button" class="btn btn-outline-light btn-sm d-flex align-items-center justify-content-center me-2" style="width: 36px; height: 36px;">
+        <i class="bi bi-arrow-left fs-4"></i>
+      </button>
       <h2 class="mb-4 text-center text-white">회원가입</h2>
       <form @submit.prevent="onRegister">
-        <input type="hidden" name="_csrf" :value="csrfToken" />
         <div class="mb-3">
           <label class="form-label text-white">아이디</label>
           <input v-model="form.username" @blur="validateUsername" class="form-control" required />
@@ -39,6 +41,10 @@ const form = reactive({
 const msg = ref('')
 const success = ref(false)
 const csrfToken = ref('')
+
+function goBack() {
+  router.back();
+}
 
 function validateUsername() {
   const usernameValid = /^[a-zA-Z0-9_]+$/.test(form.username);

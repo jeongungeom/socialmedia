@@ -32,6 +32,7 @@
         </div>
 
         <button class="btn btn-primary w-100 py-2 fw-bold">로그인</button>
+        <div v-if="errorMsg" class="error">{{ errorMsg }}</div>
       </form>
 
       <!-- 소셜 로그인 -->
@@ -41,7 +42,7 @@
 
       <!-- 회원가입 링크 -->
       <div class="text-center">
-        <small class="text-muted">
+        <small class="text-decoration-none">
           계정이 없으신가요?
           <a href="#" class="text-decoration-none" @click.prevent="register">가입하기</a>
         </small>
@@ -51,19 +52,32 @@
 </template>
 
 <script setup>
-import { reactive } from 'vue'
+import {reactive, ref} from 'vue'
 import { useRouter } from 'vue-router'
+import api from "../api/axios.js";
 
+const errorMsg = ref(""); // Vue 예시
 const router = useRouter()
 const form = reactive({
   username: '',
   password: ''
 })
 
-const handleLogin = () => {
-  // 실제 로그인 API 호출 로직 구현
-  router.push('/feed')
-}
+const handleLogin = async () => {
+  errorMsg.value = "";
+  try {
+    const loginRes = await api.post('/auth/login', {
+      username: form.username,
+      password: form.password
+    });
+    const token = loginRes.data.token;
+    localStorage.setItem('jwt', token);
+    await router.push('/feed');
+  } catch (e) {
+    errorMsg.value = e.response?.data || "로그인에 실패했습니다.";
+  }
+};
+
 
 function register() {
   router.push('/signUp')
@@ -86,5 +100,13 @@ function register() {
 
 .ig-logo-text {
   color: #fafafa;
+}
+
+.error {
+  color: #e74c3c;
+  margin-top: 10px;
+  font-size: 1rem;
+  font-weight: bold;
+  text-align: center;
 }
 </style>
