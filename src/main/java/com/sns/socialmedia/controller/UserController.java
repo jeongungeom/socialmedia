@@ -6,10 +6,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -28,7 +28,33 @@ public class UserController {
 
     // 로그인 (JWT 발급)
     @PostMapping("/login")
-    public String login(@RequestBody Users user) {
-        return usersService.login(user.getUsername(), user.getPassword());
+    public ResponseEntity<?> login(@RequestBody Users user) {
+        String token = usersService.login(user.getUsername(), user.getPassword());
+        return ResponseEntity.ok(Map.of("token", token));
     }
+
+    // 회원정보 조회
+    @GetMapping("/profile")
+    public Optional<Users> getProfile(HttpServletRequest request) {
+        Long id = (Long) request.getAttribute("id");
+        return usersService.findById(id);
+    }
+
+    @PutMapping("/update")
+    public ResponseEntity<?> updateProfile(HttpServletRequest request, @RequestBody Users updateUser) {
+        updateUser.setId((Long) request.getAttribute("id"));
+        usersService.updateUser(updateUser);
+        return ResponseEntity.ok("프로필이 수정되었습니다.");
+    }
+
+    @PutMapping("/deleteUser")
+    public ResponseEntity<?> deleteUser(HttpServletRequest request, @RequestBody Users deleteUser) {
+        Long id = (Long) request.getAttribute("id");
+        usersService.deleteUser(id, deleteUser);
+        return ResponseEntity.ok("계정이 삭제되었습니다.");
+    }
+
+
+
+
 }

@@ -40,7 +40,6 @@ const form = reactive({
 })
 const msg = ref('')
 const success = ref(false)
-const csrfToken = ref('')
 
 function goBack() {
   router.back();

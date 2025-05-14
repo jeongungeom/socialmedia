@@ -10,7 +10,7 @@
           <li><a href="#" class="nav-link"><i class="bi bi-search me-3"></i>검색</a></li>
           <li><a href="#" class="nav-link"><i class="bi bi-heart me-3"></i>알림</a></li>
           <li><a href="#" class="nav-link"><i class="bi bi-plus-square me-3"></i>포스팅</a></li>
-          <li><a href="#" class="nav-link"><i class="bi bi-person-circle me-3"></i>프로필</a></li>
+          <li><a href="#" class="nav-link" @click.prevent="goProfile"><i class="bi bi-person-circle me-3"></i>프로필</a></li>
         </ul>
       </div>
     </nav>
@@ -68,7 +68,9 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 // 더미 데이터 (실제 서비스에서는 API 호출)
 const posts = ref([
   {
@@ -92,6 +94,11 @@ const posts = ref([
     time: '5시간 전'
   }
 ])
+
+function goProfile() {
+  router.push("/profile")
+}
+
 </script>
 
 <style scoped>

@@ -37,27 +37,41 @@ public class UsersService {
 
     // 로그인 및 JWT 발급
     public String login(String username, String rawPassword) {
-        // 1. Optional<User> 안전하게 해제
         Users user = usersMapper.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("존재하지 않는 아이디입니다."));
 
-        // 비밀번호 비교
         if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
             throw new RuntimeException("비밀번호가 일치하지 않습니다.");
         }
 
         // JWT 발급
-        return jwtUtil.generateToken(user.getUsername());
+        return jwtUtil.generateToken(user.getId(), user.getUsername());
+
     }
 
+    public Optional<Users> findById(Long id) {
+        return usersMapper.findById(id);
+    }
 
     // 회원 정보 수정
     public int updateUser(Users users) {
+        if(usersMapper.findByUsernameNotMe(users).isPresent()) {
+            throw new DuplicateUserException("이미 사용중인 아이디입니다.");
+        }
+        if(users.getPassword() != null) {
+            users.setPassword(passwordEncoder.encode(users.getPassword()));
+        }
         return usersMapper.updateUser(users);
     }
 
     // 회원 정보 삭제
-    public int deleteUser(Long id) {
+    public int deleteUser(Long id, Users users) {
+        Users user = usersMapper.findByUsername(users.getUsername())
+                .orElseThrow();
+
+        if (!passwordEncoder.matches(users.getPassword(), user.getPassword())) {
+            throw new RuntimeException("비밀번호가 일치하지 않습니다.");
+        }
         return usersMapper.deleteUser(id);
     }
 

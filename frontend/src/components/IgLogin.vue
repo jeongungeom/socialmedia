@@ -37,7 +37,7 @@
 
       <!-- 소셜 로그인 -->
       <div class="text-center mb-4">
-          <span class="mx-3 text-muted">또는</span>
+          <span class="text-decoration-none">또는</span>
       </div>
 
       <!-- 회원가입 링크 -->
@@ -57,7 +57,7 @@ import { useRouter } from 'vue-router'
 import api from "../api/axios.js";
 
 const errorMsg = ref(""); // Vue 예시
-const router = useRouter()
+const router = useRouter();
 const form = reactive({
   username: '',
   password: ''
