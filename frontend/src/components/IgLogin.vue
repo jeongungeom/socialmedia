@@ -14,10 +14,10 @@
               v-model="form.username"
               type="text"
               class="form-control"
-              placeholder="사용자 이름 or 혹은 이메일"
+              placeholder="사용자 이름"
               required
           >
-          <label>사용자 이름 or 이메일</label>
+          <label>사용자 이름</label>
         </div>
 
         <div class="form-floating mb-3">
