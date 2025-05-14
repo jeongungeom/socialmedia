@@ -53,6 +53,6 @@
 
     <!-- username 일부로 사용자 검색 -->
     <select id="searchByUsername" parameterType="string" resultType="Users">
-        SELECT * FROM users WHERE username LIKE CONCAT('%', #{keyword}, '%') AND DELETE_YN = 'N'
+        SELECT ID, USERNAME, BIO, PROFILE_PICTURE FROM users WHERE USERNAME LIKE CONCAT('%', #{keyword}, '%') AND DELETE_YN = 'N'
     </select>
 </mapper>

@@ -1,39 +1,41 @@
 <template>
-  <div class="ig-profile-2025">
-    <!-- 상단 프로필 영역 -->
-    <section class="ig-profile-header">
-      <div class="ig-profile-avatar-wrap">
-        <img :src="user.profileImage" alt="프로필" class="ig-profile-avatar" />
-      </div>
-      <div class="ig-profile-meta">
-        <div class="ig-profile-row">
-          <span class="ig-profile-username">{{ user.username }}</span>
-          <button class="ig-profile-edit" @click="goUpdate">프로필 편집</button>
+  <div class="ig-profile-2025-dark">
+    <!-- 프로필 상단 -->
+    <section class="profile-header-2025">
+      <img :src="user.profileImage" alt="프로필" class="profile-avatar-2025" />
+      <div class="profile-meta-2025">
+        <div class="profile-row-2025">
+          <span class="profile-username-2025">{{ user.username }}</span>
+          <button class="profile-edit-2025" @click="goUpdate">프로필 편집</button>
+          <button class="profile-logout-2025" @click="logout" title="로그아웃">
+            <i class="bi bi-box-arrow-right"></i>
+            <span class="d-none d-md-inline">로그아웃</span>
+          </button>
         </div>
-        <div class="ig-profile-stats">
+        <div class="profile-stats-2025">
           <div>
-            <span class="ig-profile-count">{{ user.postCount }}</span>
-            <span class="ig-profile-label">게시물</span>
+            <span class="profile-label-2025">게시물</span>
+            <span class="profile-count-2025"> {{ user.postCount >= 0 ? '0' : user.postCount }}</span>
           </div>
           <div>
-            <span class="ig-profile-count">{{ user.followerCount }}</span>
-            <span class="ig-profile-label">팔로워</span>
+            <span class="profile-label-2025">팔로워</span>
+            <span class="profile-count-2025"> {{ user.followerCount }}</span>
           </div>
           <div>
-            <span class="ig-profile-count">{{ user.followingCount }}</span>
-            <span class="ig-profile-label">팔로잉</span>
+            <span class="profile-label-2025">팔로잉</span>
+            <span class="profile-count-2025"> {{ user.followingCount }}</span>
           </div>
         </div>
-        <div class="ig-profile-bio">
+        <div class="profile-bio-2025">
           <p>{{ user.bio }}</p>
         </div>
       </div>
     </section>
 
-    <!-- 피드 그리드 영역 -->
-    <section class="ig-profile-feed">
-      <div class="ig-feed-grid">
-        <div v-for="post in user.posts" :key="post.id" class="ig-feed-item">
+    <!-- 피드 그리드 -->
+    <section class="profile-feed-2025">
+      <div class="feed-grid-2025">
+        <div v-for="post in user.posts" :key="post.id" class="feed-item-2025">
           <img :src="post.image" alt="피드 이미지" />
         </div>
       </div>
@@ -41,9 +43,7 @@
   </div>
 </template>
 
-
 <script setup>
-
 
 import {onMounted, ref} from "vue";
 import {useRouter} from "vue-router";
@@ -71,9 +71,9 @@ onMounted(async () => {
   const token = localStorage.getItem('jwt');
   console.log(token);
   if (!token) {
-    msg.value = '로그인이 필요합니다.1';
+    msg.value = '로그인이 필요합니다.';
     alert(msg.value)
-    // await router.push('/')
+    await router.push('/')
     return;
   }
   try {
@@ -83,10 +83,10 @@ onMounted(async () => {
     user.value = res.data;
   } catch (e) {
     if (e.response && e.response.status === 401) {
-      msg.value = '로그인이 필요합니다.2';
+      msg.value = '로그인이 필요합니다.';
       alert(msg.value)
       localStorage.removeItem('jwt');
-      // await router.push('/')
+      await router.push('/')
     } else {
       msg.value = '프로필 정보를 불러올 수 없습니다.';
     }
@@ -99,163 +99,210 @@ function goUpdate() {
   router.push("/update")
 }
 
+function logout() {
+  localStorage.removeItem('jwt');
+  router.push("/login");
+}
+
 </script>
 
 <style scoped>
-.ig-profile-2025 {
-  max-width: 650px;
-  margin: 40px auto 0 auto;
-  background: var(--ig-bg, #fff);
-  border-radius: 18px;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.07);
-  padding: 32px 24px 24px 24px;
+.ig-profile-2025-dark {
+  min-height: 100vh;
+  background: #111;
+  color: #fafafa;
   font-family: 'Segoe UI', 'Apple SD Gothic Neo', Arial, sans-serif;
-  color: var(--ig-text, #222);
+  padding: 0;
+  margin: 0;
 }
 
-.ig-profile-header {
+/* 프로필 상단 */
+.profile-header-2025 {
   display: flex;
-  align-items: flex-start;
-  gap: 32px;
-  margin-bottom: 32px;
+  align-items: center;
+  gap: 40px;
+  padding: 48px 0 24px 0;
+  max-width: 900px;
+  margin: 0 auto;
+  border-bottom: 1px solid #222;
 }
 
-.ig-profile-avatar-wrap {
-  flex-shrink: 0;
-}
-
-.ig-profile-avatar {
-  width: 110px;
-  height: 110px;
+.profile-avatar-2025 {
+  width: 120px;
+  height: 120px;
   border-radius: 50%;
-  border: 3px solid #e1e1e1;
+  border: 3px solid #333;
   object-fit: cover;
-  background: #fafafa;
+  background: #181818;
 }
 
-.ig-profile-meta {
+.profile-meta-2025 {
   flex: 1;
 }
 
-.ig-profile-row {
+.profile-row-2025 {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 20px;
+  margin-bottom: 18px;
 }
 
-.ig-profile-username {
-  font-size: 1.6rem;
-  font-weight: 600;
-  margin-right: 8px;
+.profile-username-2025 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #fafafa;
 }
 
-.ig-profile-edit {
-  padding: 6px 18px;
-  border: 1px solid #dbdbdb;
-  background: #fafafa;
+.profile-edit-2025 {
+  padding: 7px 22px;
+  border: 1px solid #333;
+  background: #181818;
   border-radius: 8px;
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 500;
-  color: #222;
+  color: #fafafa;
   cursor: pointer;
   transition: background 0.2s;
 }
-.ig-profile-edit:hover {
-  background: #f0f0f0;
+.profile-edit-2025:hover {
+  background: #232323;
 }
 
-.ig-profile-stats {
+.profile-stats-2025 {
   display: flex;
-  gap: 32px;
-  margin: 18px 0 6px 0;
+  gap: 36px;
+  margin-bottom: 10px;
 }
-.ig-profile-count {
+.profile-count-2025 {
   font-weight: 700;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   margin-right: 3px;
 }
-.ig-profile-label {
+.profile-label-2025 {
   font-size: 1rem;
-  color: #888;
+  color: #aaa;
 }
 
-.ig-profile-bio {
-  margin-top: 6px;
-  font-size: 1.05rem;
-  color: #444;
+.profile-bio-2025 {
+  margin-top: 8px;
+  font-size: 1.07rem;
+  color: #bbb;
 }
 
-.ig-profile-feed {
-  margin-top: 12px;
+/* 피드 그리드 */
+.profile-feed-2025 {
+  margin: 0 auto;
+  padding: 40px 0 0 0;
+  max-width: 900px;
 }
-.ig-feed-grid {
+
+.feed-grid-2025 {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
 }
-.ig-feed-item {
+
+.feed-item-2025 {
   aspect-ratio: 3 / 4;
-  background: #eee;
-  border-radius: 8px;
+  background: #181818;
+  border-radius: 10px;
   overflow: hidden;
   position: relative;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.18);
+  transition: transform 0.18s;
 }
-.ig-feed-item img {
+.feed-item-2025 img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
   transition: transform 0.2s;
 }
-.ig-feed-item img:hover {
-  transform: scale(1.03);
+.feed-item-2025 img:hover {
+  transform: scale(1.04);
 }
 
-/* 다크모드 대응 */
-@media (prefers-color-scheme: dark) {
-  .ig-profile-2025 {
-    --ig-bg: #181818;
-    --ig-text: #fafafa;
-    background: var(--ig-bg);
-    color: var(--ig-text);
-    box-shadow: 0 4px 24px rgba(0,0,0,0.25);
+/* 모바일 반응형 */
+@media (max-width: 900px) {
+  .profile-header-2025, .profile-feed-2025 {
+    max-width: 98vw;
+    padding-left: 8px;
+    padding-right: 8px;
   }
-  .ig-profile-avatar {
-    border-color: #333;
-    background: #222;
-  }
-  .ig-profile-edit {
-    background: #222;
-    color: #fafafa;
-    border-color: #444;
-  }
-  .ig-profile-edit:hover {
-    background: #333;
-  }
-  .ig-profile-label {
-    color: #bbb;
-  }
-  .ig-feed-item {
-    background: #222;
+  .feed-grid-2025 {
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 @media (max-width: 600px) {
-  .ig-profile-2025 {
-    padding: 12px 2vw;
-    max-width: 100vw;
-  }
-  .ig-profile-header {
+  .profile-header-2025 {
     flex-direction: column;
-    align-items: center;
-    gap: 16px;
-    margin-bottom: 20px;
+    align-items: flex-start;
+    gap: 18px;
+    padding: 32px 0 16px 0;
   }
-  .ig-profile-meta {
-    width: 100%;
-  }
-  .ig-feed-grid {
+  .feed-grid-2025 {
     grid-template-columns: repeat(2, 1fr);
-    gap: 4px;
+    gap: 5px;
+  }
+  .profile-avatar-2025 {
+    width: 80px;
+    height: 80px;
+  }
+}
+/* ... 기존 스타일 ... */
+.profile-row-2025 {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 18px;
+}
+.profile-edit-2025 {
+  padding: 7px 22px;
+  border: 1px solid #333;
+  background: #181818;
+  border-radius: 8px;
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: #fafafa;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.profile-edit-2025:hover {
+  background: #232323;
+}
+
+/* 로그아웃 버튼 스타일 */
+.profile-logout-2025 {
+  padding: 7px 18px;
+  border: 1px solid #333;
+  background: #232323;
+  border-radius: 8px;
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: #e1306c;
+  cursor: pointer;
+  margin-left: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.2s, color 0.2s;
+}
+.profile-logout-2025:hover {
+  background: #181818;
+  color: #fff;
+}
+.profile-logout-2025 i {
+  font-size: 1.1rem;
+}
+@media (max-width: 600px) {
+  .profile-row-2025 {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .profile-edit-2025,
+  .profile-logout-2025 {
+    font-size: 0.97rem;
+    padding: 6px 12px;
   }
 }
 </style>
