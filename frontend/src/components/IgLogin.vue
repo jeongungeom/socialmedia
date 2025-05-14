@@ -4,7 +4,7 @@
       <!-- 로고 -->
       <div class="text-center mb-4">
         <i class="bi bi-instagram" style="font-size:3.5rem; color:#e1306c;"></i>
-        <h1 class="mt-2 ig-logo-text">Instagram</h1>
+        <h1 class="mt-2 ig-logo-text">Eomstagram</h1>
       </div>
 
       <!-- 로그인 폼 -->
