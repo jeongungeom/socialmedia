@@ -2,7 +2,7 @@
   <div class="ig-profile-2025-dark">
     <!-- 프로필 상단 -->
     <section class="profile-header-2025">
-      <img :src="user.profileImage" alt="프로필" class="profile-avatar-2025" />
+      <img :src="`/api/auth/image/${user.profilePicture}`" alt="프로필" class="profile-avatar-2025" />
       <div class="profile-meta-2025">
         <div class="profile-row-2025">
           <span class="profile-username-2025">{{ user.username }}</span>
