@@ -1,6 +1,8 @@
 package com.sns.socialmedia.service;
 
 
+import com.sns.socialmedia.Dto.PhotoDto;
+import com.sns.socialmedia.Dto.ProfileDto;
 import com.sns.socialmedia.exception.DuplicateUserException;
 import com.sns.socialmedia.mapper.UsersMapper;
 import com.sns.socialmedia.model.Users;
@@ -49,8 +51,13 @@ public class UsersService {
 
     }
 
-    public Optional<Users> findById(Long id) {
+    // 고유번호로 정보조회
+    public ProfileDto findById(Long id) {
         return usersMapper.findById(id);
+    }
+
+    public PhotoDto getMyPhoto(Long id) {
+        return usersMapper.getMyPhoto(id);
     }
 
     // 회원 정보 수정

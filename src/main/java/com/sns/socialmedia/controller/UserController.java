@@ -1,5 +1,7 @@
 package com.sns.socialmedia.controller;
 
+import com.sns.socialmedia.Dto.PhotoDto;
+import com.sns.socialmedia.Dto.ProfileDto;
 import com.sns.socialmedia.model.Users;
 import com.sns.socialmedia.service.UsersService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -35,9 +37,16 @@ public class UserController {
 
     // 회원정보 조회
     @GetMapping("/profile")
-    public Optional<Users> getProfile(HttpServletRequest request) {
+    public ProfileDto getProfile(HttpServletRequest request) {
         Long id = (Long) request.getAttribute("id");
         return usersService.findById(id);
+    }
+
+    // 게시물 조회
+    @GetMapping("/photo")
+    public PhotoDto getPhoto(HttpServletRequest request) {
+        Long id = (Long) request.getAttribute("id");
+        return usersService.getMyPhoto(id);
     }
 
     @PutMapping("/update")

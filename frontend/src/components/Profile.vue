@@ -14,16 +14,16 @@
         </div>
         <div class="profile-stats-2025">
           <div>
-            <span class="profile-label-2025">게시물</span>
-            <span class="profile-count-2025"> {{ user.postCount >= 0 ? '0' : user.postCount }}</span>
+            <span class="profile-label-2025">게시물 </span>
+            <span class="profile-count-2025">{{ user.postCount }}</span>
           </div>
           <div>
-            <span class="profile-label-2025">팔로워</span>
-            <span class="profile-count-2025"> {{ user.followerCount }}</span>
+            <span class="profile-label-2025">팔로워 </span>
+            <span class="profile-count-2025">{{ user.followerCount }}</span>
           </div>
           <div>
-            <span class="profile-label-2025">팔로잉</span>
-            <span class="profile-count-2025"> {{ user.followingCount }}</span>
+            <span class="profile-label-2025">팔로잉 </span>
+            <span class="profile-count-2025">{{ user.followingCount }}</span>
           </div>
         </div>
         <div class="profile-bio-2025">
@@ -35,8 +35,12 @@
     <!-- 피드 그리드 -->
     <section class="profile-feed-2025">
       <div class="feed-grid-2025">
-        <div v-for="post in user.posts" :key="post.id" class="feed-item-2025">
-          <img :src="post.image" alt="피드 이미지" />
+        <div>
+          <div v-for="photo in photos" :key="photo.id">
+            <img :src="photo.image_url" alt="게시물 이미지" />
+            <p>{{ photo.caption }}</p>
+            <small>{{ photo.created_at }}</small>
+          </div>
         </div>
       </div>
     </section>
@@ -55,35 +59,36 @@ const success = ref(false)
 const router = useRouter();
 const user = ref({
   username: '',
-  profileImage: '',
+  profilePicture: '',
   postCount: 0,
   followerCount: 0,
   followingCount: 0,
   bio: '',
-  posts: [
-    { id: 1, image: '/feed1.jpg' },
-    { id: 2, image: '/feed2.jpg' },
-    // ...
-  ]
 })
+
+const photos = ref([]);
 
 onMounted(async () => {
   const token = localStorage.getItem('jwt');
   console.log(token);
   if (!token) {
-    msg.value = '로그인이 필요합니다.';
+    msg.value = '로그인이 필요합니다.1';
     alert(msg.value)
     await router.push('/')
     return;
   }
   try {
-    const res = await api.get('/auth/profile', {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    user.value = res.data;
+    await Promise.all([
+      api.get('/auth/profile', {headers: {Authorization: `Bearer ${token}`}}),
+      api.get('/auth/photo', {headers: {Authorization: `Bearer ${token}`}})
+    ])
+        .then(([profileRes, photoRes]) => {
+          user.value = profileRes.data;
+          photo.value = photoRes.data;
+        })
   } catch (e) {
     if (e.response && e.response.status === 401) {
-      msg.value = '로그인이 필요합니다.';
+      msg.value = '로그인이 필요합니다.2';
       alert(msg.value)
       localStorage.removeItem('jwt');
       await router.push('/')
@@ -101,7 +106,7 @@ function goUpdate() {
 
 function logout() {
   localStorage.removeItem('jwt');
-  router.push("/login");
+  router.push("/");
 }
 
 </script>

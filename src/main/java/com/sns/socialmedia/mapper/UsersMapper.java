@@ -1,5 +1,7 @@
 package com.sns.socialmedia.mapper;
 
+import com.sns.socialmedia.Dto.PhotoDto;
+import com.sns.socialmedia.Dto.ProfileDto;
 import com.sns.socialmedia.model.Users;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -12,7 +14,8 @@ public interface UsersMapper {
     Users Login(String username, String password); // 로그인
     int updateUser(Users users); // 정보 수정
     int deleteUser(Long id); // 삭제
-    Optional<Users> findById(Long id); // id으로 사용자 조회
+    ProfileDto findById(Long id); // id으로 사용자 조회
+    PhotoDto getMyPhoto(Long id);
     Optional<Users> findByUsername(String username); // username으로 사용자 조회
     Optional<Users> findByUsernameNotMe(Users users); // username으로 사용자 조회
     Optional<Users> findByEmail(String email); // 이메일로 사용자 조회 (비밀번호 재설정 시 사용)
