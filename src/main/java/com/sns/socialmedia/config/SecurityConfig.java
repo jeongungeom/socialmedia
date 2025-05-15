@@ -48,7 +48,8 @@ public class SecurityConfig {
                                 "/api/auth/register",
                                 "/api/auth/signup",
                                 "/api/auth/login",
-                                "/api/auth/signin"
+                                "/api/auth/signin",
+                                "/api/auth/image/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

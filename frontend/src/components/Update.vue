@@ -8,12 +8,32 @@
       <div class="card-body">
         <form @submit.prevent="updateProfile">
           <div class="mb-3">
+            <div class="mb-3 text-center">
+              <label for="profilePicUpload" class="upload-label">프로필 사진 등록</label>
+              <input type="file" id="profilePicUpload" accept="image/png, image/jpeg" @change="onFileChange" style="display:none;" />
+              <div class="profile-avatar-wrap">
+                <img
+                    v-if="previewUrl"
+                    :src="previewUrl"
+                    alt="프로필 미리보기"
+                    class="profile-avatar-preview"
+                />
+                <img
+                    v-else
+                    :src="`/api/auth/image/${form.profilePicture}`"
+                    alt="프로필"
+                    class="profile-avatar-preview"
+                />
+              </div>
+            </div>
+
+          </div><div class="mb-3">
             <label class="form-label">이름</label>
             <input v-model="form.username" type="text" class="form-control edit-input" required />
           </div>
           <div class="mb-3">
             <label class="form-label">소개</label>
-            <input v-model="form.bio" type="text" class="form-control edit-input" required />
+            <input v-model="form.bio" type="text" class="form-control edit-input" />
           </div>
           <div class="mb-3">
             <label class="form-label">이메일</label>
@@ -49,22 +69,44 @@ import api from "../api/axios.js";
 import {useRouter} from "vue-router";
 
 const router = useRouter();
-const form = ref({ username: '', bio: '', email: '', password: ''})
+const form = ref({
+  id: '',
+  username: '',
+  bio: '',
+  email: '',
+  password: '',
+  profilePicture: ''})
 const msg = ref('')
 const success = ref(false)
+const previewUrl = ref('');
+const selectedFile = ref(null);
 
+function onFileChange(e) {
+  const file = e.target.files[0]
+  if (file) {
+    selectedFile.value = file
+    previewUrl.value = URL.createObjectURL(file)
+  }
+}
 
 async function updateProfile() {
+  const formData = new FormData()
+  formData.append('username', form.value.username)
+  formData.append('bio', form.value.bio)
+  formData.append('email', form.value.email)
+  formData.append('password', form.value.password)
+  if (selectedFile.value) {
+    formData.append('profilePicture', selectedFile.value)
+  }
+
   try {
-    await api.put('/auth/update', form.value, {
+    const res = await api.post('/auth/update', formData, {
       headers: { Authorization: `Bearer ${localStorage.getItem('jwt')}` }
     })
+    form.value.profilePicture = res.data.profilePicture;
     alert("수정완료");
-    success.value = true
-    await router.push("/profile")
   } catch (e) {
-    msg.value = e.response?.data || '수정 실패'
-    success.value = false
+    alert('저장 실패: ' + (e.response?.data?.message || e.message))
   }
 }
 
@@ -73,7 +115,10 @@ onMounted(async () => {
     const res = await api.get('/auth/profile', {
       headers: { Authorization: `Bearer ${localStorage.getItem('jwt')}` }
     })
+    console.log(res.data);
     form.value = res.data
+    console.log(form.value.profilePicture);
+    console.log(res.data.profilePicture);
   } catch (e) {
     msg.value = '프로필 정보를 불러올 수 없습니다.'
     success.value = false
@@ -174,5 +219,25 @@ function deleteAccount() {
 }
 .text-danger {
   color: #ff5a5a !important;
+}
+.profile-avatar-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.profile-avatar-preview {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #e1306c;
+  background: #222;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.13);
+  transition: box-shadow 0.18s;
+}
+.profile-avatar-preview:hover {
+  box-shadow: 0 4px 16px rgba(225,48,108,0.23);
 }
 </style>

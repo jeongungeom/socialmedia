@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 @Setter
 @Getter
 @NoArgsConstructor
-@AllArgsConstructor
 public class Users {
     private long id;
     private String username;
@@ -19,4 +18,12 @@ public class Users {
     private String bio;
     private String profilePicture;
     private LocalDateTime createdAt;
+
+    public Users(long id, String username, String email, String password, String bio) {
+        this.id = id;
+        this.username = username;
+        this.email = email;
+        this.password = password;
+        this.bio = bio;
+    }
 }

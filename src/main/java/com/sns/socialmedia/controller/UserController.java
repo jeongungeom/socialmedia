@@ -2,16 +2,20 @@ package com.sns.socialmedia.controller;
 
 import com.sns.socialmedia.Dto.PhotoDto;
 import com.sns.socialmedia.Dto.ProfileDto;
+import com.sns.socialmedia.mapper.UsersMapper;
 import com.sns.socialmedia.model.Users;
 import com.sns.socialmedia.service.UsersService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -49,11 +53,34 @@ public class UserController {
         return usersService.getMyPhoto(id);
     }
 
-    @PutMapping("/update")
-    public ResponseEntity<?> updateProfile(HttpServletRequest request, @RequestBody Users updateUser) {
-        updateUser.setId((Long) request.getAttribute("id"));
-        usersService.updateUser(updateUser);
-        return ResponseEntity.ok("프로필이 수정되었습니다.");
+    @PostMapping("/update")
+    public ResponseEntity<?> updateProfile(
+            @RequestParam("username") String username,
+            @RequestParam("bio") String bio,
+            @RequestParam("email") String email,
+            @RequestParam("password") String password,
+            @RequestParam(value = "profilePicture", required = false) MultipartFile profilePicture,
+            HttpServletRequest request
+    ) {
+        Users users = new Users((Long) request.getAttribute("id"), username, email, password, bio);
+
+        String imgUrl =  usersService.updateUser(users, profilePicture);
+        return ResponseEntity.ok(imgUrl);
+    }
+
+    @GetMapping("/image/{filename:.+}")
+    public ResponseEntity<Resource> getProfileImage(@PathVariable String filename) {
+        Resource file = usersService.loadProfileImage(filename);
+        if (file == null || !file.exists()) {
+            return ResponseEntity.notFound().build();
+        }
+        String contentType = "image/jpeg";
+        String ext = StringUtils.getFilenameExtension(filename);
+        if ("png".equalsIgnoreCase(ext)) contentType = "image/png";
+        else if ("gif".equalsIgnoreCase(ext)) contentType = "image/gif";
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_TYPE, contentType)
+                .body(file);
     }
 
     @PutMapping("/deleteUser")

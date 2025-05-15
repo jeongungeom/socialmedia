@@ -9,10 +9,22 @@ import com.sns.socialmedia.model.Users;
 import com.sns.socialmedia.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -25,6 +37,8 @@ public class UsersService {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private JwtUtil jwtUtil;
+    @Value("${profile.upload.dir}")
+    private String uploadDir;
 
     // 회원가입 및 아이디 중복 체크
     public void checkValid(Users users) {
@@ -61,14 +75,40 @@ public class UsersService {
     }
 
     // 회원 정보 수정
-    public int updateUser(Users users) {
+    @Transactional
+    public String updateUser(Users users, MultipartFile profilePicture) {
         if(usersMapper.findByUsernameNotMe(users).isPresent()) {
             throw new DuplicateUserException("이미 사용중인 아이디입니다.");
         }
         if(users.getPassword() != null) {
             users.setPassword(passwordEncoder.encode(users.getPassword()));
         }
-        return usersMapper.updateUser(users);
+
+        String profilePicFileName = null;
+        if (profilePicture != null && !profilePicture.isEmpty()) {
+            String ext = Objects.requireNonNull(profilePicture.getOriginalFilename())
+                    .substring(profilePicture.getOriginalFilename().lastIndexOf("."));
+            profilePicFileName = "user_" + users.getId() + "_" + System.currentTimeMillis() + ext;
+            Path savePath = Paths.get(uploadDir, profilePicFileName);
+            users.setProfilePicture(profilePicFileName);
+            try {
+                Files.copy(profilePicture.getInputStream(), savePath, StandardCopyOption.REPLACE_EXISTING);
+            } catch (IOException e) {
+                throw new RuntimeException("프로필 사진 저장 실패", e);
+            }
+        }
+        usersMapper.updateUser(users);
+
+        return profilePicFileName;
+    }
+
+    public Resource loadProfileImage(String filename) {
+        try {
+            Path file = Paths.get(uploadDir, filename);
+            return new UrlResource(file.toUri());
+        } catch (MalformedURLException e) {
+            return null;
+        }
     }
 
     // 회원 정보 삭제

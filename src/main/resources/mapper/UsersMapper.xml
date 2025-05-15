@@ -64,8 +64,10 @@
                          USERNAME = #{username},
                          EMAIL = #{email},
                          PASSWORD = #{password},
-                         BIO = #{bio},
-                         PROFILE_PICTURE = #{profilePicture}
+                         BIO = #{bio}
+                        <if test="profilePicture != null">
+                            , PROFILE_PICTURE = #{profilePicture}
+                        </if>
         WHERE id = #{id}
     </update>
 

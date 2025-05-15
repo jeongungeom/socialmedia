@@ -70,7 +70,6 @@ const photos = ref([]);
 
 onMounted(async () => {
   const token = localStorage.getItem('jwt');
-  console.log(token);
   if (!token) {
     msg.value = '로그인이 필요합니다.1';
     alert(msg.value)

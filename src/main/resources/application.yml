@@ -12,6 +12,10 @@ spring:
         show_sql: true
         format_sql: true
         use_sql_comments: true
+  servlet:
+    multipart:
+      max-file-size: 100MB
+
 
 mybatis:
   mapper-locations: classpath:mapper/*.xml
@@ -26,7 +30,15 @@ logging:
     root: INFO
     com.sns.socialmedia: DEBUG
     org.springframework.security: DEBUG
+    org.mybatis: DEBUG
+    org.mybatis.spring.SqlSessionTemplate: DEBUG
+    org.springframework.jdbc.datasource: DEBUG
 
 jwt:
   secret: YzEyMzR0bXZxQzRmNTZ2cEFoUGVpMWdIajU3aWdoZ2g
   expiration: 3600000
+
+profile:
+  upload:
+    dir: C:\File
+
