@@ -15,51 +15,73 @@
       <li><a href="#" class="nav-link" @click="goProfile"><i class="bi bi-person-circle me-3"></i>프로필</a></li>
     </ul>
 
-    <!-- 검색 슬라이드 패널 -->
     <transition name="slide-left">
       <div v-if="showSearchPanel" class="ig-search-panel">
-        <button class="close-btn" @click="showSearchPanel = false" title="닫기">
+        <button class="close-btn" @click="showSearchPanel = false, searchQuery = ''; searchResults = []"  title="닫기">
           <i class="bi bi-x-lg"></i>
         </button>
         <div class="search-content">
-          <input type="text" class="form-control mb-3" placeholder="검색어를 입력하세요" v-model="searchQuery" />
-          <!-- 검색 결과 예시 -->
+          <input
+              type="text"
+              class="form-control mb-3"
+              placeholder="검색어를 입력하세요"
+              v-model="searchQuery"
+          />
           <div v-if="searchQuery">
-            <div class="search-result" v-for="user in filteredUsers" :key="user.id">
-              <img :src="user.avatar" class="rounded-circle me-2" width="32" height="32" />
-              <span>{{ user.username }}</span>
+            <div v-if="searchResults.length > 0">
+              <div class="search-result" @click="goPage(user.id)" v-for="user in searchResults" :key="user.id"  style="cursor:pointer">
+                <img
+                    :src="`/api/auth/image/${user.profilePicture}`"
+                    class="rounded-circle me-2"
+                    width="32"
+                    height="32"
+                    alt="프로필"
+                />
+                <span>{{ user.username }}</span>
+              </div>
             </div>
+            <div v-else class="text-decoration-none">검색 결과가 없습니다.</div>
           </div>
-          <div v-else class="text-muted">검색어를 입력하세요.</div>
         </div>
       </div>
     </transition>
-    <!-- 오버레이 -->
     <div v-if="showSearchPanel" class="ig-search-overlay" @click="showSearchPanel = false"></div>
   </nav>
 </template>
 
 <script setup>
 
-import {computed, ref} from "vue";
+import {computed, ref, watch} from "vue";
 import { useRouter } from 'vue-router'
+import api from "../api/axios.js";
 
 const router = useRouter()
 const showSearchPanel = ref(false)
 const searchQuery = ref('')
+const searchResults = ref([])
 
-const users = [
-  { id: 1, username: "creative_2025", avatar: "https://source.unsplash.com/random/100x100/?portrait" },
-  { id: 2, username: "tech_lover", avatar: "https://source.unsplash.com/random/100x100/?tech" },
-  { id: 3, username: "nature_fan", avatar: "https://source.unsplash.com/random/100x100/?nature" }
-]
-const filteredUsers = computed(() =>
-    searchQuery.value
-        ? users.filter(u =>
-            u.username.toLowerCase().includes(searchQuery.value.toLowerCase())
-        )
-        : []
-)
+let debounceTimer = null
+
+watch(searchQuery, (newVal) => {
+  if (!newVal) {
+    searchResults.value = []
+    return
+  }
+  if (debounceTimer) clearTimeout(debounceTimer)
+  debounceTimer = setTimeout(async () => {
+    try {
+      const res = await api.get('/auth/searchUser', { params: { keyword: newVal } })
+      searchResults.value = res.data
+    } catch (e) {
+      searchResults.value = []
+    }
+  }, 400)
+})
+
+const form = ref({
+  id: '',
+  keyword: ''
+})
 
 function goProfile() {
   router.push("/profile")
@@ -68,6 +90,14 @@ function goProfile() {
 function goFeed() {
   router.push("/feed")
 }
+
+function goPage(id) {
+  showSearchPanel.value=false;
+  router.push(`/profile/${id}`)
+  searchQuery.value = '';
+  searchResults.value = [];
+}
+
 
 </script>
 

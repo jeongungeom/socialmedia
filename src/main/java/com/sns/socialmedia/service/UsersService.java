@@ -10,6 +10,7 @@ import com.sns.socialmedia.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -48,6 +49,8 @@ public class UsersService {
             throw new DuplicateUserException("이미 사용중인 이메일입니다.");
         }
         users.setPassword(passwordEncoder.encode(users.getPassword()));
+        users.setProfilePicture("default_profile.jpg");
+
        usersMapper.insertUser(users);
     }
 
@@ -105,7 +108,14 @@ public class UsersService {
     public Resource loadProfileImage(String filename) {
         try {
             Path file = Paths.get(uploadDir, filename);
-            return new UrlResource(file.toUri());
+            if (Files.exists(file)) {
+                return new UrlResource(file.toUri());
+            }
+            Resource defaultImage = new ClassPathResource("static/images/" + filename);
+            if (defaultImage.exists()) {
+                return defaultImage;
+            }
+            return null;
         } catch (MalformedURLException e) {
             return null;
         }
@@ -133,7 +143,7 @@ public class UsersService {
     }
 
     // 사용자 검색
-    public List<Users>  searchByUsername(String keyword) {
-        return usersMapper.searchByUsername(keyword);
+    public List<Users> searchByUsername(Long id, String keyword) {
+        return usersMapper.searchByUsername(id, keyword);
     }
 }

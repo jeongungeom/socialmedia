@@ -15,6 +15,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -39,10 +40,16 @@ public class UserController {
         return ResponseEntity.ok(Map.of("token", token));
     }
 
-    // 회원정보 조회
+    // 내정보 조회
     @GetMapping("/profile")
     public ProfileDto getProfile(HttpServletRequest request) {
         Long id = (Long) request.getAttribute("id");
+        return usersService.findById(id);
+    }
+
+    // 상대방 페이지 조회
+    @GetMapping("/profile/{id}")
+    public ProfileDto getOtherProfile(@PathVariable("id") Long id) {
         return usersService.findById(id);
     }
 
@@ -50,6 +57,12 @@ public class UserController {
     @GetMapping("/photo")
     public PhotoDto getPhoto(HttpServletRequest request) {
         Long id = (Long) request.getAttribute("id");
+        return usersService.getMyPhoto(id);
+    }
+
+    // 상대방 게시물 조회
+    @GetMapping("/photo/{id}")
+    public PhotoDto getOtherPhoto(@PathVariable("id") Long id) {
         return usersService.getMyPhoto(id);
     }
 
@@ -88,6 +101,13 @@ public class UserController {
         Long id = (Long) request.getAttribute("id");
         usersService.deleteUser(id, deleteUser);
         return ResponseEntity.ok("계정이 삭제되었습니다.");
+    }
+
+    @GetMapping("/searchUser")
+    public ResponseEntity<?> searchUser(HttpServletRequest request, @RequestParam("keyword") String keyword) {
+        Long id = (Long) request.getAttribute("id");
+        List<Users> usersList = usersService.searchByUsername(id, keyword);
+        return ResponseEntity.ok(usersList);
     }
 
 

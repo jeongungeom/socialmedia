@@ -50,12 +50,12 @@
 <script setup>
 
 import {onMounted, ref} from "vue";
-import {useRouter} from "vue-router";
+import {useRoute, useRouter} from "vue-router";
 import api from "../api/axios.js";
 
 const msg = ref('')
 const success = ref(false)
-
+const route = useRoute();
 const router = useRouter();
 const user = ref({
   username: '',
@@ -69,35 +69,53 @@ const user = ref({
 const photos = ref([]);
 
 onMounted(async () => {
-  const token = localStorage.getItem('jwt');
-  if (!token) {
-    msg.value = '로그인이 필요합니다.1';
-    alert(msg.value)
-    await router.push('/')
-    return;
-  }
   try {
-    await Promise.all([
-      api.get('/auth/profile', {headers: {Authorization: `Bearer ${token}`}}),
-      api.get('/auth/photo', {headers: {Authorization: `Bearer ${token}`}})
-    ])
-        .then(([profileRes, photoRes]) => {
-          user.value = profileRes.data;
-          photo.value = photoRes.data;
-        })
-  } catch (e) {
-    if (e.response && e.response.status === 401) {
-      msg.value = '로그인이 필요합니다.2';
-      alert(msg.value)
-      localStorage.removeItem('jwt');
-      await router.push('/')
+    if (!route.params.id) {
+      await handleMyProfile();
     } else {
-      msg.value = '프로필 정보를 불러올 수 없습니다.';
+      await handleUserProfile(route.params.id);
     }
-    success.value = false;
+  } catch (error) {
+    handleError(error);
   }
 });
 
+async function handleMyProfile() {
+  const token = localStorage.getItem('jwt');
+  if (!token) {
+    throw { message: '로그인이 필요합니다.', redirect: true };
+  }
+
+  const [profileRes, photoRes] = await Promise.all([
+    api.get('/auth/profile', { headers: { Authorization: `Bearer ${token}` } }),
+    api.get('/auth/photo', { headers: { Authorization: `Bearer ${token}` } })
+  ]);
+
+  user.value = profileRes.data;
+  photos.value = photoRes.data;
+}
+
+async function handleUserProfile(userId) {
+  const [profileRes, photoRes] = await Promise.all([
+    api.get(`/auth/profile/${userId}`),
+    api.get(`/auth/photo/${userId}`)
+  ]);
+
+  user.value = profileRes.data;
+  photos.value = photoRes.data;
+}
+
+function handleError(error) {
+  if (error.response?.status === 401 || error.redirect) {
+    msg.value = error.message || '로그인이 필요합니다.';
+    localStorage.removeItem('jwt');
+    router.push('/login');
+  } else {
+    msg.value = error.message || '프로필 정보를 불러올 수 없습니다.';
+  }
+  alert(msg.value);
+  success.value = false;
+}
 
 function goUpdate() {
   router.push("/update")

@@ -10,9 +10,11 @@ import Profile from '../components/Profile.vue'
 const routes = [
     { path: '/', component: IgLogin },
     { path: '/feed', component: Feed, meta: {requiresAuth: true} },
-    { path: '/signUp', component: SignUp, meta: {requiresAuth: true} },
+    { path: '/signUp', component: SignUp},
     { path: '/update', component: Update, meta: {requiresAuth: true} },
     { path: '/profile', component: Profile, meta: {requiresAuth: true} },
+    { path: '/profile/:id', component: Profile }
+
 ]
 
 const router = createRouter({

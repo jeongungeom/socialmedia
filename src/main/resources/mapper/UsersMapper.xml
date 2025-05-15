@@ -79,7 +79,10 @@
     </delete>
 
     <!-- username 일부로 사용자 검색 -->
-    <select id="searchByUsername" parameterType="string" resultType="Users">
-        SELECT ID, USERNAME, BIO, PROFILE_PICTURE FROM users WHERE USERNAME LIKE CONCAT('%', #{keyword}, '%') AND DELETE_YN = 'N'
+    <select id="searchByUsername" parameterType="Users" resultType="Users">
+        SELECT ID, USERNAME, BIO, PROFILE_PICTURE
+        FROM users
+        WHERE USERNAME LIKE CONCAT('%', #{keyword}, '%') AND DELETE_YN = 'N'
+        LIMIT 20
     </select>
 </mapper>
