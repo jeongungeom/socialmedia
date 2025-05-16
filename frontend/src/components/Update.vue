@@ -9,8 +9,17 @@
         <form @submit.prevent="updateProfile">
           <div class="mb-3">
             <div class="mb-3 text-center">
-              <label for="profilePicUpload" class="upload-label">프로필 사진 등록</label>
-              <input type="file" id="profilePicUpload" accept="image/png, image/jpeg" @change="onFileChange" style="display:none;" />
+              <input
+                  type="file"
+                  id="profilePicUpload"
+                  accept="image/png, image/jpeg"
+                  @change="onFileChange"
+                  class="profile-upload-input"
+              />
+              <label for="profilePicUpload" class="profile-upload-label">
+                <i class="bi bi-camera" style="margin-right: 8px"></i>
+                프로필 사진 등록
+              </label>
               <div class="profile-avatar-wrap">
                 <img
                     v-if="previewUrl"
@@ -130,8 +139,7 @@ function goBack() {
 }
 
 function deleteAccount() {
-
-  if(form.value.password === null) {
+  if(!!!form.value.password) {
     alert('비밀번호를 입력해주세요');
     return false;
   }
@@ -238,6 +246,37 @@ function deleteAccount() {
   transition: box-shadow 0.18s;
 }
 .profile-avatar-preview:hover {
+  box-shadow: 0 4px 16px rgba(225,48,108,0.23);
+}
+.profile-upload-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.profile-upload-input {
+  display: none;
+}
+
+.profile-upload-label {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 22px;
+  border-radius: 24px;
+  background: linear-gradient(90deg, #e1306c 0%, #fdc468 100%);
+  color: #fff;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(225,48,108,0.13);
+  transition: background 0.18s, box-shadow 0.18s;
+  border: none;
+  outline: none;
+}
+
+.profile-upload-label:hover {
+  background: linear-gradient(90deg, #fdc468 0%, #e1306c 100%);
   box-shadow: 0 4px 16px rgba(225,48,108,0.23);
 }
 </style>
