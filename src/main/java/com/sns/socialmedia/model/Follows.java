@@ -14,7 +14,11 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Follows {
-    private long follwerId;
+    private long followerId;
     private long followingId;
+    private  String followerUsername;
+    private  String followingUsername;
+    private String followerProfilePicture;
+    private String followingProfilePicture;
     private LocalDateTime createdAt;
 }

@@ -29,6 +29,16 @@
         <div class="profile-bio-2025">
           <p>{{ user.bio }}</p>
         </div>
+        <!-- 팔로우 버튼: 본인 프로필이 아닐 때만 표시 -->
+        <div v-if="!isMe" class="profile-follow-btn-wrap-2025">
+          <button
+              class="profile-follow-btn-2025"
+              :class="{ following: isFollowing }"
+              @click="toggleFollow"
+          >
+            {{ isFollowing ? '팔로우 취소' : '팔로우' }}
+          </button>
+        </div>
       </div>
     </section>
 
@@ -47,12 +57,15 @@
   </div>
 </template>
 
+
 <script setup>
 
 import {onMounted, ref} from "vue";
 import {useRoute, useRouter} from "vue-router";
 import api from "../api/axios.js";
 
+const isMe = ref(false)
+const isFollowing = ref(false)
 const msg = ref('')
 const success = ref(false)
 const route = useRoute();
@@ -124,6 +137,10 @@ function goUpdate() {
 function logout() {
   localStorage.removeItem('jwt');
   router.push("/");
+}
+
+function toggleFollow() {
+  isFollowing.value = !isFollowing.value
 }
 
 </script>
@@ -326,5 +343,27 @@ function logout() {
     font-size: 0.97rem;
     padding: 6px 12px;
   }
+}
+.profile-follow-btn-wrap-2025 {
+  margin-top: 12px;
+  margin-bottom: 8px;
+}
+.profile-follow-btn-2025 {
+  padding: 7px 28px;
+  border-radius: 8px;
+  background: #e1306c;
+  color: #fff;
+  font-weight: 600;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.18s;
+}
+.profile-follow-btn-2025.following {
+  background: #bbb;
+  color: #222;
+}
+.profile-follow-btn-2025:hover {
+  background: #c41e5a;
 }
 </style>

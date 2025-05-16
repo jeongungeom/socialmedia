@@ -12,33 +12,27 @@ import java.util.List;
 public class FollowsService {
     private final FollowsMapper followsMapper;
 
-    // 팔로우 등록
-    public int insertFollow(Follows follows) {
-        return followsMapper.insertFollow(follows);
+    public void follow(Long followerId, Long followingId) {
+        followsMapper.insertFollow(followerId, followingId);
     }
 
-    // 팔로우 취소
-    public int deleteFollow(Long followerId, Long followingId) {
-        return followsMapper.deleteFollow(followerId, followingId);
+    public void unfollow(Long followerId, Long followingId) {
+        followsMapper.deleteFollow(followerId, followingId);
     }
 
-    // 팔로잉 수 조회
-    public int countByFollowerId(Long followerId) {
-        return followsMapper.countByFollowerId(followerId);
+    public List<Follows> getFollowers(Long userId) {
+        return followsMapper.selectFollowers(userId);
     }
 
-    // 팔로워 수 조회
-    public int countByFollowingId(Long followingId) {
-        return followsMapper.countByFollowingId(followingId);
+    public List<Follows> getFollowings(Long userId) {
+        return followsMapper.selectFollowings(userId);
     }
 
-    // 나를 팔로우하는 사람 목록
-    public List<Follows> findFollowers(Long userId) {
-        return followsMapper.findFollowers(userId);
+    public int getFollowerCount(Long userId) {
+        return followsMapper.countFollowers(userId);
     }
 
-    // 내가 팔로우하는 사람 목록
-    public List<Follows> findFollowings(Long userId) {
-        return followsMapper.findFollowings(userId);
+    public int getFollowingCount(Long userId) {
+        return followsMapper.countFollowings(userId);
     }
 }

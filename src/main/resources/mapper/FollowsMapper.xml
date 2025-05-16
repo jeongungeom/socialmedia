@@ -6,46 +6,40 @@
 <mapper namespace="com.sns.socialmedia.mapper.FollowsMapper">
 
     <!-- 팔로우 등록 -->
-    <insert id="insertFollows" parameterType="Follows">
-        /* 팔로우 관계 등록 */
+    <insert id="insertFollow" parameterType="Follows">
         INSERT INTO follows (FOLLOWER_ID, FOLLOWING_ID, CREATED_AT)
         VALUES (#{followerId}, #{followingId}, NOW())
     </insert>
 
     <!-- 팔로우 취소 -->
-    <delete id="deleteFollows">
-        /* 팔로우 관계 삭제 */
+    <delete id="deleteFollow">
         DELETE FROM follows WHERE FOLLOWER_ID = #{followerId} AND FOLLOWING_ID = #{followingId}
     </delete>
 
-    <!-- 팔로우 관계 존재 여부 확인 -->
-    <select id="existsByFollowerIdAndFollowingId" resultType="boolean">
-        /* follower_id, following_id로 팔로우 관계 존재 여부 확인 */
-        SELECT COUNT(*) > 0 FROM follows WHERE FOLLOWER_ID = #{followerId} AND FOLLOWING_ID = #{followingId}
-    </select>
-
     <!-- 팔로잉 수 조회 -->
-    <select id="countByFollowerId" parameterType="long" resultType="int">
-        /* follower_id로 내가 팔로우하는 사람 수 조회 */
+    <select id="countFollowings" parameterType="long" resultType="int">
         SELECT COUNT(*) FROM follows WHERE FOLLOWER_ID = #{followerId}
     </select>
 
     <!-- 팔로워 수 조회 -->
-    <select id="countByFollowingId" parameterType="long" resultType="int">
-        /* following_id로 나를 팔로우하는 사람 수 조회 */
+    <select id="countFollowers" parameterType="long" resultType="int">
         SELECT COUNT(*) FROM follows WHERE FOLLOWING_ID = #{followingId}
     </select>
 
     <!-- 나를 팔로우하는 사람 목록 -->
-    <select id="findFollowers" parameterType="long" resultType="Follows">
-        /* following_id로 나를 팔로우하는 사람 목록 조회 */
-        SELECT * FROM follows WHERE FOLLOWING_ID = #{userId}
+    <select id="selectFollowers" parameterType="long" resultType="Follows">
+        SELECT u.ID AS followerId, u.USERNAME AS followerUsername, u.PROFILE_PICTURE AS followerProfilePicture
+        FROM follow f
+                 INNER JOIN users u ON f.FOLLOWER_ID = u.ID
+        WHERE f.FOLLOWING_ID = #{userId}
     </select>
 
     <!-- 내가 팔로우하는 사람 목록 -->
-    <select id="findFollowings" parameterType="long" resultType="Follows">
-        /* follower_id로 내가 팔로우하는 사람 목록 조회 */
-        SELECT * FROM follows WHERE FOLLOWER_ID = #{userId}
+    <select id="selectFollowings" parameterType="long" resultType="Follows">
+        SELECT u.id AS followingId, u.username AS followingUsername, u.profile_picture AS followingProfilePicture
+        FROM follow f
+                 INNER JOIN users u ON f.following_id = u.id
+        WHERE f.follower_id = #{userId}
     </select>
 
 </mapper>
