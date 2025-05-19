@@ -1,6 +1,7 @@
 package com.sns.socialmedia.model;
 
 
+import com.sns.socialmedia.enums.NotificationType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,10 +22,10 @@ public class Notifications {
     private boolean isRead;
     private LocalDateTime createdAt;
 
-    public void save(Long receiverId, Long senderId, String type, String message) {
+    public void save(Long receiverId, Long senderId, NotificationType type, String message) {
         this.receiverId = receiverId;
         this.senderId = senderId;
-        this.type = type;
+        this.type = type.getLabel();
         this.message = message;
     }
 }
