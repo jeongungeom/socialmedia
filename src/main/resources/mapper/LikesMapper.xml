@@ -6,14 +6,14 @@
 <mapper namespace="com.sns.socialmedia.mapper.LikesMapper">
 
     <!-- 좋아요 등록 -->
-    <insert id="insertLikes" parameterType="Likes">
+    <insert id="insertLike" parameterType="Likes">
         /* 게시물에 좋아요 등록 */
         INSERT INTO likes (USER_ID, PHOTO_ID, CREATED_AT)
         VALUES (#{userId}, #{photoId}, NOW())
     </insert>
 
     <!-- 좋아요 취소 -->
-    <delete id="deleteLikes">
+    <delete id="deleteLike">
         /* 특정 사용자의 특정 게시물 좋아요 취소 */
         DELETE FROM likes WHERE USER_ID = #{userId} AND PHOTO_ID = #{postId}
     </delete>
