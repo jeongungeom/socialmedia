@@ -29,7 +29,7 @@
     <!-- 나를 팔로우하는 사람 목록 -->
     <select id="selectFollowers" parameterType="long" resultType="Follows">
         SELECT u.ID AS followerId, u.USERNAME AS followerUsername, u.PROFILE_PICTURE AS followerProfilePicture
-        FROM follow f
+        FROM follows f
                  INNER JOIN users u ON f.FOLLOWER_ID = u.ID
         WHERE f.FOLLOWING_ID = #{userId}
     </select>
@@ -37,9 +37,13 @@
     <!-- 내가 팔로우하는 사람 목록 -->
     <select id="selectFollowings" parameterType="long" resultType="Follows">
         SELECT u.id AS followingId, u.username AS followingUsername, u.profile_picture AS followingProfilePicture
-        FROM follow f
+        FROM follows f
                  INNER JOIN users u ON f.following_id = u.id
         WHERE f.follower_id = #{userId}
+    </select>
+
+    <select id="countByFollowerAndFollowing" resultType="int">
+        SELECT COUNT(*) FROM follows WHERE FOLLOWER_ID = #{myId} AND FOLLOWING_ID = #{userId}
     </select>
 
 </mapper>

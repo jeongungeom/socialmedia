@@ -6,8 +6,8 @@
       <div class="profile-meta-2025">
         <div class="profile-row-2025">
           <span class="profile-username-2025">{{ user.username }}</span>
-          <button class="profile-edit-2025" @click="goUpdate">프로필 편집</button>
-          <button class="profile-logout-2025" @click="logout" title="로그아웃">
+          <button v-if="isMe" class="profile-edit-2025" @click="goUpdate">프로필 편집</button>
+          <button v-if="isMe" class="profile-logout-2025" @click="logout" title="로그아웃">
             <i class="bi bi-box-arrow-right"></i>
             <span class="d-none d-md-inline">로그아웃</span>
           </button>
@@ -19,11 +19,11 @@
           </div>
           <div>
             <span class="profile-label-2025">팔로워 </span>
-            <span class="profile-count-2025">{{ user.followerCount }}</span>
+            <span @click="getFollowers" style="cursor: pointer" class="profile-count-2025">{{ user.followerCount }}</span>
           </div>
           <div>
             <span class="profile-label-2025">팔로잉 </span>
-            <span class="profile-count-2025">{{ user.followingCount }}</span>
+            <span @click="getFollowings" style="cursor: pointer" class="profile-count-2025">{{ user.followingCount }}</span>
           </div>
         </div>
         <div class="profile-bio-2025">
@@ -34,7 +34,7 @@
           <button
               class="profile-follow-btn-2025"
               :class="{ following: isFollowing }"
-              @click="toggleFollow"
+              @click="toggleFollow(isFollowing)"
           >
             {{ isFollowing ? '팔로우 취소' : '팔로우' }}
           </button>
@@ -55,7 +55,48 @@
       </div>
     </section>
   </div>
+
+  <!-- 팔로워 목록 모달 -->
+  <div v-if="showFollowers" class="popup-overlay" @click.self="closeFollowers">
+    <div class="popup-modal">
+      <h4>팔로워</h4>
+      <ul class="popup-list">
+        <li v-for="f in follows" :key="f.followerId" class="popup-item">
+          <img
+              :src="`/api/auth/image/${f.followerProfilePicture}`"
+              alt="프로필"
+              class="popup-avatar"
+              width="36"
+              height="36"
+          />
+          <span @click="goUserProfile(f.followerId)" style="cursor:pointer" class="popup-username">{{ f.followerUsername }}</span>
+        </li>
+      </ul>
+      <button class="popup-close-btn" @click="closeFollowers">닫기</button>
+    </div>
+  </div>
+
+  <!-- 팔로잉 목록 모달 -->
+  <div v-if="showFollowings" class="popup-overlay" @click.self="closeFollowings">
+    <div class="popup-modal">
+      <h4>팔로잉</h4>
+      <ul class="popup-list">
+        <li v-for="f in follows" :key="f.followingId" class="popup-item">
+          <img
+              :src="`/api/auth/image/${f.followingProfilePicture}`"
+              alt="프로필"
+              class="popup-avatar"
+              width="36"
+              height="36"
+          />
+          <span @click="goUserProfile(f.followingId)" style="cursor:pointer" class="popup-username">{{ f.followingUsername }}</span>
+        </li>
+      </ul>
+      <button class="popup-close-btn" @click="closeFollowings">닫기</button>
+    </div>
+  </div>
 </template>
+
 
 
 <script setup>
@@ -63,13 +104,17 @@
 import {onMounted, ref} from "vue";
 import {useRoute, useRouter} from "vue-router";
 import api from "../api/axios.js";
+import {useUserStore} from "../stores/auth.js";
 
-const isMe = ref(false)
-const isFollowing = ref(false)
-const msg = ref('')
-const success = ref(false)
+const showFollowers = ref(false);
+const showFollowings = ref(false);
+const isMe = ref(false);
+const isFollowing = ref(false);
+const msg = ref('');
+const success = ref(false);
 const route = useRoute();
 const router = useRouter();
+const userStore = useUserStore()
 const user = ref({
   username: '',
   profilePicture: '',
@@ -79,14 +124,26 @@ const user = ref({
   bio: '',
 })
 
+const follows = ref({
+  followerId: '',
+  followerProfilePicture: '',
+  followerUsername: '',
+  followingId: '',
+  followingProfilePicture: '',
+  followingUsername: '',
+})
+
+
 const photos = ref([]);
 
 onMounted(async () => {
   try {
     if (!route.params.id) {
+      isMe.value = true;
       await handleMyProfile();
     } else {
       await handleUserProfile(route.params.id);
+      await isFollow(route.params.id);
     }
   } catch (error) {
     handleError(error);
@@ -103,7 +160,7 @@ async function handleMyProfile() {
     api.get('/auth/profile', { headers: { Authorization: `Bearer ${token}` } }),
     api.get('/auth/photo', { headers: { Authorization: `Bearer ${token}` } })
   ]);
-
+  userStore.setUser(profileRes.data);
   user.value = profileRes.data;
   photos.value = photoRes.data;
 }
@@ -116,6 +173,15 @@ async function handleUserProfile(userId) {
 
   user.value = profileRes.data;
   photos.value = photoRes.data;
+}
+
+async function isFollow(profileId) {
+  const res = await api.get('/follow/isFollowing', {
+    params: { userId:  profileId },
+    headers: { Authorization: `Bearer ${localStorage.getItem('jwt')}` }
+  });
+
+  isFollowing.value = res.data;
 }
 
 function handleError(error) {
@@ -139,8 +205,75 @@ function logout() {
   router.push("/");
 }
 
-function toggleFollow() {
-  isFollowing.value = !isFollowing.value
+async function toggleFollow(isValid) {
+  if(isValid) {
+    await deleteFollow();
+  } else {
+    await addFollow();
+  }
+}
+
+async function addFollow() {
+  try {
+    await api.post(`/follow/${route.params.id}`, null, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('jwt')}` }
+    });
+    await isFollow(route.params.id);
+    await handleUserProfile(route.params.id);
+  } catch (e) {
+    msg.value = e.response?.data || '오류 발생!'
+  }
+}
+
+async function deleteFollow() {
+  try {
+    await api.delete(`/follow/${route.params.id}`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('jwt')}` }
+    });
+    await isFollow(route.params.id);
+    await handleUserProfile(route.params.id);
+  } catch (e) {
+    msg.value = e.response?.data || '오류 발생!'
+  }
+}
+
+async function getFollowers() {
+  const userId = route.params.id ? route.params.id : userStore.id;
+  try {
+    const followerRes = await api.get(`/follow/followers/${userId}`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('jwt')}` }
+    });
+    showFollowers.value = true
+    follows.value = followerRes.data;
+  } catch (e) {
+    msg.value = e.response?.data || '오류 발생!'
+  }
+}
+
+async function getFollowings() {
+  const userId = route.params.id ? route.params.id : userStore.id;
+  try {
+    const followingRes = await api.get(`/follow/followings/${userId}`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('jwt')}` }
+    });
+    showFollowings.value = true
+    follows.value = followingRes.data;
+  } catch (e) {
+    msg.value = e.response?.data || '오류 발생!'
+  }
+}
+
+function closeFollowers() {
+  showFollowers.value = false
+}
+function closeFollowings() {
+  showFollowings.value = false
+}
+
+async function goUserProfile(userId) {
+  showFollowers.value = false
+  showFollowings.value = false
+  await handleUserProfile(userId);
 }
 
 </script>
@@ -365,5 +498,52 @@ function toggleFollow() {
 }
 .profile-follow-btn-2025:hover {
   background: #c41e5a;
+}
+.popup-overlay {
+  position: fixed;
+  left: 0; top: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.popup-modal {
+  background: #fff;
+  border-radius: 14px;
+  padding: 28px 32px;
+  min-width: 480px;   /* 기존 320px에서 키움 */
+  max-height: 80vh;   /* 기존 70vh에서 키움 */
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+}
+.popup-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 14px 0;
+}
+.popup-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+.popup-avatar {
+  border-radius: 50%;
+  object-fit: cover;
+  border: none;
+}
+.popup-username {
+  font-weight: 500;
+  color: #222;
+}
+.popup-close-btn {
+  background: #e1306c;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 18px;
+  font-weight: 600;
+  cursor: pointer;
 }
 </style>

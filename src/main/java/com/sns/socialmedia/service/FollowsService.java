@@ -35,4 +35,9 @@ public class FollowsService {
     public int getFollowingCount(Long userId) {
         return followsMapper.countFollowings(userId);
     }
+
+    public boolean isFollowing(Long myId, Long userId) {
+        return followsMapper.countByFollowerAndFollowing(myId, userId) > 0;
+    }
+
 }

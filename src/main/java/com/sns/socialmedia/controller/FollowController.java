@@ -3,6 +3,7 @@ package com.sns.socialmedia.controller;
 
 import com.sns.socialmedia.model.Follows;
 import com.sns.socialmedia.service.FollowsService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -18,12 +19,14 @@ public class FollowController {
     private final FollowsService followsService;
 
     @PostMapping("/{userId}")
-    public void follow(@PathVariable Long userId, @RequestParam Long myId) {
+    public void follow(@PathVariable Long userId, HttpServletRequest request) {
+        Long myId = (Long) request.getAttribute("id");
         followsService.follow(myId, userId);
     }
 
     @DeleteMapping("/{userId}")
-    public void unfollow(@PathVariable Long userId, @RequestParam Long myId) {
+    public void unfollow(@PathVariable Long userId, HttpServletRequest request) {
+        Long myId = (Long) request.getAttribute("id");
         followsService.unfollow(myId, userId);
     }
 
@@ -45,5 +48,12 @@ public class FollowController {
     @GetMapping("/count/followings/{userId}")
     public int getFollowingCount(@PathVariable Long userId) {
         return followsService.getFollowingCount(userId);
+    }
+
+    @GetMapping("/isFollowing")
+    public boolean isFollowing(@RequestParam Long userId, HttpServletRequest request) {
+        Long myId = (Long) request.getAttribute("id");
+        if (myId == null || myId.equals(userId)) return false;
+        return followsService.isFollowing(myId, userId);
     }
 }

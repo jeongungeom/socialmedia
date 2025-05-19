@@ -14,4 +14,5 @@ public interface FollowsMapper {
     List<Follows> selectFollowings(@Param("userId") Long userId);  // 내가 팔로우하는 사람
     int countFollowers(@Param("userId") Long userId);
     int countFollowings(@Param("userId") Long userId);
+    int countByFollowerAndFollowing(Long myId, Long userId);
 }

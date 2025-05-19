@@ -52,7 +52,10 @@ public class SecurityConfig {
                                 "/api/auth/image/**",
                                 "/api/auth/searchUser/**",
                                 "/api/auth/profile/**",
-                                "/api/auth/photo/**"
+                                "/api/auth/photo/**",
+                                "api/follow/**",
+                                "api/follow/followers/**",
+                                "api/follow/followings/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
