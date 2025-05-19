@@ -17,7 +17,7 @@
 
     <transition name="slide-left">
       <div v-if="showSearchPanel" class="ig-search-panel">
-        <button class="close-btn" @click="showSearchPanel = false, searchQuery = ''; searchResults = []"  title="닫기">
+        <button class="close-btn" @click="closeSearchPanel"  title="닫기">
           <i class="bi bi-x-lg"></i>
         </button>
         <div class="search-content">
@@ -45,7 +45,7 @@
         </div>
       </div>
     </transition>
-    <div v-if="showSearchPanel" class="ig-search-overlay" @click="showSearchPanel = false"></div>
+    <div v-if="showSearchPanel" class="ig-search-overlay" @click="closeSearchPanel"></div>
   </nav>
 </template>
 
@@ -101,6 +101,12 @@ function goPage(id) {
   router.push(`/profile/${id}`)
   searchQuery.value = '';
   searchResults.value = [];
+}
+
+function closeSearchPanel() {
+  showSearchPanel.value = false
+  searchQuery.value = ''
+  searchResults.value = []
 }
 
 
