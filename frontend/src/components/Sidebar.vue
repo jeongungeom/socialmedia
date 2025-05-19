@@ -70,7 +70,12 @@ watch(searchQuery, (newVal) => {
   if (debounceTimer) clearTimeout(debounceTimer)
   debounceTimer = setTimeout(async () => {
     try {
-      const res = await api.get('/auth/searchUser', { params: { keyword: newVal } })
+      const res = await api.get('/auth/searchUser',
+          {
+            params: {keyword: newVal},
+            headers: {Authorization: `Bearer ${localStorage.getItem('jwt')}`}
+          }
+      )
       searchResults.value = res.data
     } catch (e) {
       searchResults.value = []

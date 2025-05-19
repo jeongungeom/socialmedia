@@ -82,7 +82,9 @@
     <select id="searchByUsername" parameterType="Users" resultType="Users">
         SELECT ID, USERNAME, BIO, PROFILE_PICTURE
         FROM users
-        WHERE USERNAME LIKE CONCAT('%', #{keyword}, '%') AND DELETE_YN = 'N'
+        WHERE USERNAME LIKE CONCAT('%', #{keyword}, '%')
+          AND DELETE_YN = 'N'
+          AND ID != #{id}
         LIMIT 20
     </select>
 </mapper>
