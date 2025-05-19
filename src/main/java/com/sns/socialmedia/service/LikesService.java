@@ -22,11 +22,6 @@ public class LikesService {
         return likesMapper.deleteLike(userId, postId);
     }
 
-    // 사용자가 해당 게시물에 좋아요 했는지 확인
-    public boolean existsByUserIdAndPostId(Long userId, Long postId) {
-        return likesMapper.existsByUserIdAndPostId(userId, postId);
-    }
-
     // 게시물별 좋아요 수 조회
     public int countByPostId(Long postId) {
         return likesMapper.countByPostId(postId);
