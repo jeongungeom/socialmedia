@@ -17,19 +17,7 @@ const isLoginPage = computed(() => route.path === '/')
 
 
 <style>
-.app-layout {
-  display: flex;
-  min-height: 100vh;
-}
-.main-content {
-  flex: 1;
-  background: #fafafa;
-  min-height: 100vh;
-  transition: margin-left 0.2s;
-}
-@media (max-width: 600px) {
-  .main-content {
-    margin-left: 60px;
-  }
+body {
+  background: #000 !important;
 }
 </style>
