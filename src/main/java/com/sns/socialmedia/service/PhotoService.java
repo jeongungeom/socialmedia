@@ -15,8 +15,8 @@ public class PhotoService {
     private final PhotosMapper photosMapper;
 
     // 게시물 등록
-    public int insertPhotos(Photos photo){
-        return photosMapper.insertPhotos(photo);
+    public void insertPhotos(Photos photo){
+        photosMapper.insertPhotos(photo);
     }
 
     // 게시물 ID로 조회
@@ -40,8 +40,8 @@ public class PhotoService {
     }
 
     // 게시물 삭제
-    public int deletePhotos(Long id){
-        return photosMapper.deletePhotos(id);
+    public void deletePhotos(Long userId, Long id){
+        photosMapper.deletePhotos(userId, id);
     }
 
     // 사용자의 게시물 수 조회

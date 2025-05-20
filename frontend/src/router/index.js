@@ -5,6 +5,7 @@ import Feed from '../components/Feed.vue'
 import SignUp from '../components/SignUp.vue'
 import Update from '../components/Update.vue'
 import Profile from '../components/Profile.vue'
+import Post from "../components/Post.vue";
 
 
 const routes = [
@@ -13,7 +14,8 @@ const routes = [
     { path: '/signUp', component: SignUp},
     { path: '/update', component: Update, meta: {requiresAuth: true} },
     { path: '/profile', component: Profile, meta: {requiresAuth: true} },
-    { path: '/profile/:id', component: Profile }
+    { path: '/profile/:id', component: Profile },
+    { path: '/post', component: Post }
 
 ]
 

@@ -53,18 +53,38 @@ public class UserController {
         return usersService.findById(id);
     }
 
-    // 게시물 조회
-    @GetMapping("/photo")
-    public PhotoDto getPhoto(HttpServletRequest request) {
-        Long id = (Long) request.getAttribute("id");
-        return usersService.getMyPhoto(id);
+//    // 게시물 단건 조회
+//    @GetMapping("/photo")
+//    public PhotoDto getPhoto(HttpServletRequest request, Long id) {
+//        Long userId = (Long) request.getAttribute("id");
+//        return usersService.getMyPhoto(userId, id);
+//    }
+
+    // 게시물 다건 조회
+    @GetMapping("/photos")
+    public List<PhotoDto> getPhotos(HttpServletRequest request) {
+        Long userId = (Long) request.getAttribute("id");
+        return usersService.getMyPhotos(userId);
+    }
+//
+//    // 상대방 게시물 단건 조회
+//    @GetMapping("/photo/{id}")
+//    public PhotoDto getOtherPhoto(@PathVariable("id") Long userId, Long id) {
+//        return usersService.getMyPhoto(userId, id);
+//    }
+
+    // 상대방 다건 게시물 조회
+    @GetMapping("/photos/{id}")
+    public List<PhotoDto> getOtherPhotos(@PathVariable("id") Long id) {
+        return usersService.getMyPhotos(id);
     }
 
-    // 상대방 게시물 조회
-    @GetMapping("/photo/{id}")
-    public PhotoDto getOtherPhoto(@PathVariable("id") Long id) {
-        return usersService.getMyPhoto(id);
+    // 게시물 단건 조회 통합
+    @GetMapping("/photoOne")
+    public PhotoDto getPhotoOne(@RequestParam("userId") Long userId, @RequestParam("id") Long id) {
+        return usersService.getMyPhoto(userId, id);
     }
+
 
     @PostMapping("/update")
     public ResponseEntity<?> updateProfile(

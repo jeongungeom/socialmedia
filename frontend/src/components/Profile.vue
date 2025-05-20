@@ -41,22 +41,15 @@
         </div>
       </div>
     </section>
-
-    <!-- 피드 그리드 -->
     <section class="profile-feed-2025">
       <div class="feed-grid-2025">
-        <div>
-          <div v-for="photo in photos" :key="photo.id">
-            <img :src="photo.image_url" alt="게시물 이미지" />
-            <p>{{ photo.caption }}</p>
-            <small>{{ photo.created_at }}</small>
-          </div>
+        <div v-for="photo in photos" :key="photo.id" class="feed-item-2025">
+          <img :src="encodeURI(photo.imageUrl)" @click="goDetail(photo.id)" alt="게시물 이미지" />
         </div>
       </div>
     </section>
   </div>
 
-  <!-- 팔로워 목록 모달 -->
   <div v-if="showFollowers" class="popup-overlay" @click.self="closeFollowers">
     <div class="popup-modal">
       <h4>팔로워</h4>
@@ -76,7 +69,6 @@
     </div>
   </div>
 
-  <!-- 팔로잉 목록 모달 -->
   <div v-if="showFollowings" class="popup-overlay" @click.self="closeFollowings">
     <div class="popup-modal">
       <h4>팔로잉</h4>
@@ -95,6 +87,59 @@
       <button class="popup-close-btn" @click="closeFollowings">닫기</button>
     </div>
   </div>
+
+<!-- 게시글 모달 -->
+  <div v-if="showDetail" class="insta-post-modal-bg">
+    <div class="insta-post-modal">
+      <!-- X 닫기 버튼 -->
+      <button class="close-btn" @click="closeDetail" title="닫기">
+        <i class="bi bi-x-lg"></i>
+      </button>
+      <!-- 좌측: 게시글 이미지 -->
+      <div class="insta-post-image">
+        <img :src="post.imageUrl" alt="게시물 이미지" />
+      </div>
+      <div class="insta-post-info">
+        <!-- 상단: 프로필/닉네임/옵션 -->
+        <div class="insta-post-header">
+          <img :src="`/api/auth/image/${post.profilePicture}`" class="profile-img" alt="프로필" />
+          <span class="nickname">{{ post.username }}</span>
+          <div class="option-dropdown-wrap">
+            <button v-if="isMe" class="option-btn" title="더보기" @click="toggleMenu">
+              <i class="bi bi-three-dots"></i>
+            </button>
+            <div v-if="showMenu" class="option-dropdown">
+              <button @click="editPost(post.id)"><i class="bi bi-pencil"></i> 수정</button>
+              <button @click="deletePost(post.id)"><i class="bi bi-trash"></i> 삭제</button>
+            </div>
+          </div>
+        </div>
+        <div class="header-divider"></div>
+        <div class="insta-post-content">
+          <p class="caption">
+            <span class="nickname">{{ post.username }}</span>
+            {{ post.caption }}
+          </p>
+        </div>
+        <!-- 하단: 좋아요/댓글/저장 아이콘 -->
+        <div class="insta-post-actions">
+          <button><i class="bi bi-heart"></i></button>
+          <button><i class="bi bi-chat"></i></button>
+        </div>
+        <small class="created-at">{{ post.createdAt }}</small>
+        <!-- 댓글 입력: 내 프로필 사진 추가 -->
+        <form class="insta-post-comment-form" @submit.prevent="submitComment">
+          <input
+              v-model="comment"
+              type="text"
+              placeholder="댓글 달기..."
+              autocomplete="off"
+          />
+          <button type="submit" :disabled="!comment">게시</button>
+        </form>
+      </div>
+    </div>
+  </div>
 </template>
 
 
@@ -110,6 +155,9 @@ const showFollowers = ref(false);
 const showFollowings = ref(false);
 const isMe = ref(false);
 const isFollowing = ref(false);
+const showDetail = ref(false);
+const showMenu = ref(false)
+const comment = ref('')
 const msg = ref('');
 const success = ref(false);
 const route = useRoute();
@@ -132,6 +180,16 @@ const follows = ref({
   followingProfilePicture: '',
   followingUsername: '',
 })
+
+const post = ref({
+    id: '',
+    imageUrl: '',
+    profilePicture: '',
+    username: '',
+    caption: '',
+    createdAt : '',
+})
+
 
 
 const photos = ref([]);
@@ -158,7 +216,7 @@ async function handleMyProfile() {
 
   const [profileRes, photoRes] = await Promise.all([
     api.get('/auth/profile', { headers: { Authorization: `Bearer ${token}` } }),
-    api.get('/auth/photo', { headers: { Authorization: `Bearer ${token}` } })
+    api.get('/auth/photos', { headers: { Authorization: `Bearer ${token}` } })
   ]);
   userStore.setUser(profileRes.data);
   user.value = profileRes.data;
@@ -168,7 +226,7 @@ async function handleMyProfile() {
 async function handleUserProfile(userId) {
   const [profileRes, photoRes] = await Promise.all([
     api.get(`/auth/profile/${userId}`),
-    api.get(`/auth/photo/${userId}`)
+    api.get(`/auth/photos/${userId}`)
   ]);
 
   user.value = profileRes.data;
@@ -276,6 +334,47 @@ async function goUserProfile(userId) {
   await handleUserProfile(userId);
 }
 
+async function goDetail(photoId) {
+  const userId = route.params.id ? route.params.id : userStore.id;
+
+  try {
+    const res = await api.get('/auth/photoOne', {
+      params: { userId:  userId, id: photoId},
+      headers: { Authorization: `Bearer ${localStorage.getItem('jwt')}` }
+    });
+    showDetail.value = true
+    post.value = res.data;
+  } catch (e) {
+    msg.value = e.response?.data || '오류 발생!'
+  }
+}
+
+function closeDetail() {
+  showDetail.value = false
+}
+
+function toggleMenu() {
+  showMenu.value = !showMenu.value
+}
+function editPost() {
+  showMenu.value = false
+
+}
+async function deletePost(id) {
+  showMenu.value = false
+  if (confirm('정말 삭제하시겠습니까?')) {
+    await api.delete(`/photo/delete/${id}`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('jwt')}` }
+    })
+    alert('삭제되었습니다!')
+    showDetail.value=false;
+    await handleMyProfile();
+  }
+}
+function submitComment() {
+  comment.value = ''
+}
+
 </script>
 
 <style scoped>
@@ -288,7 +387,6 @@ async function goUserProfile(userId) {
   margin: 0;
 }
 
-/* 프로필 상단 */
 .profile-header-2025 {
   display: flex;
   align-items: center;
@@ -546,4 +644,340 @@ async function goUserProfile(userId) {
   font-weight: 600;
   cursor: pointer;
 }
+.feed-grid-2025 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 한 줄에 3개 */
+  gap: 18px;
+  width: 100%;
+}
+
+.feed-item-2025 {
+  aspect-ratio: 3 / 4; /* 3:4 직사각형 (2025 인스타 그리드) */
+  background: #181818;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.18);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  transition: transform 0.18s;
+}
+
+.feed-item-2025 img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* 사진이 div를 꽉 채움 */
+  display: block;
+  transition: transform 0.2s;
+}
+
+.feed-item-2025 img:hover {
+  transform: scale(1.04);
+  cursor: pointer;
+}
+
+.feed-item-2025 p, .feed-item-2025 small {
+  margin: 0;
+  padding: 6px 10px 0 10px;
+  color: #fafafa;
+  background: rgba(0,0,0,0.18);
+  font-size: 1rem;
+  word-break: break-all;
+}
+.feed-item-2025 small {
+  font-size: 0.93rem;
+  color: #bbb;
+  padding-bottom: 8px;
+}
+
+@media (max-width: 900px) {
+  .feed-grid-2025 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 600px) {
+  .feed-grid-2025 {
+    grid-template-columns: 1fr;
+  }
+}
+.insta-post-modal-bg {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.8);
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.insta-post-modal {
+  display: flex;
+  background: #181818;
+  border-radius: 14px;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.25);
+  max-width: 900px;
+  width: 90vw;
+  height: 70vh;
+  min-height: 420px;
+  overflow: hidden;
+}
+.insta-post-image {
+  flex: 1.1;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.insta-post-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #000;
+  max-height: 70vh;
+}
+.insta-post-info {
+  flex: 0.9;
+  display: flex;
+  flex-direction: column;
+  background: #181818;
+  color: #fff;
+  padding: 24px 18px 18px 18px;
+  min-width: 340px;
+  max-width: 400px;
+}
+.insta-post-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.profile-img {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.nickname {
+  font-weight: bold;
+  font-size: 1.07rem;
+}
+.option-btn {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: #ddd;
+  font-size: 1.3rem;
+  cursor: pointer;
+}
+.insta-post-content {
+  flex: 1;
+  margin-bottom: 12px;
+  overflow-y: auto;
+}
+.caption {
+  margin: 0 0 10px 0;
+  font-size: 1.08rem;
+  word-break: break-all;
+}
+.created-at {
+  color: #bbb;
+  font-size: 0.97rem;
+}
+.insta-post-actions {
+  display: flex;
+  gap: 18px;
+  margin-bottom: 12px;
+}
+.insta-post-actions button {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.4rem;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+.insta-post-actions button:hover {
+  color: #e1306c;
+}
+.insta-post-comment-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-top: 1px solid #232323;
+  padding-top: 10px;
+}
+.insta-post-comment-form input {
+  flex: 1;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.04rem;
+  padding: 8px 4px;
+  outline: none;
+}
+.insta-post-comment-form button {
+  background: none;
+  border: none;
+  color: #e1306c;
+  font-weight: bold;
+  font-size: 1.07rem;
+  cursor: pointer;
+  opacity: 0.9;
+  transition: opacity 0.12s;
+}
+.insta-post-comment-form button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+@media (max-width: 700px) {
+  .insta-post-modal { flex-direction: column; height: auto; max-width: 98vw; }
+  .insta-post-image, .insta-post-info { min-width: 0; max-width: none; width: 100%; }
+}
+.close-btn {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.6rem;
+  z-index: 10;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+.close-btn:hover {
+  color: #e1306c;
+}
+
+.option-dropdown-wrap {
+  position: relative;
+  display: inline-block;
+}
+.option-btn {
+  background: none;
+  border: none;
+  color: #ddd;
+  font-size: 1.3rem;
+  cursor: pointer;
+  margin-left: 10px;
+}
+.option-dropdown {
+  position: absolute;
+  top: 30px;
+  right: 0;
+  background: #232323;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+  min-width: 90px;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+}
+.option-dropdown button {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.02rem;
+  text-align: left;
+  padding: 10px 18px;
+  cursor: pointer;
+  transition: background 0.14s, color 0.14s;
+}
+.option-dropdown button:hover {
+  background: #181818;
+  color: #e1306c;
+}
+
+.insta-post-comment-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-top: 1px solid #232323;
+  padding-top: 10px;
+}
+.comment-profile-img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 6px;
+  background: #222;
+}
+.insta-post-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  /* 아래 두 줄로 점 세개를 오른쪽 끝으로 */
+  justify-content: flex-start;
+}
+
+.nickname {
+  font-weight: bold;
+  font-size: 1.07rem;
+  margin-right: auto; /* 닉네임 오른쪽에 남은 공간 모두 차지 */
+}
+
+.option-dropdown-wrap {
+  margin-left: 0;
+  margin-right: 0;
+  margin-left: auto; /* 점 세개를 오른쪽 끝으로 밀기 */
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.option-btn {
+  background: none;
+  border: none;
+  color: #ddd;
+  font-size: 1.3rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  margin-left: 0;
+}
+
+.header-divider {
+  width: 100%;
+  height: 1px;
+  background: #2d2d2d; /* 적당한 회색 */
+  margin: 12px 0 16px 0;
+  border: none;
+}
+.option-dropdown {
+  position: absolute;
+  top: 36px;         /* option-btn 아래로 살짝 띄움 */
+  right: 0;
+  background: #232323;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+  min-width: 100px;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;    /* 버튼이 가로로 꽉 차게 */
+  padding: 4px 0;
+}
+
+.option-dropdown button {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.02rem;
+  text-align: left;
+  padding: 10px 18px;
+  cursor: pointer;
+  transition: background 0.14s, color 0.14s;
+  width: 100%;            /* 버튼이 드롭다운 전체 너비를 차지 */
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.option-dropdown button:hover {
+  background: #181818;
+  color: #e1306c;
+}
+
 </style>

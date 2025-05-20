@@ -10,7 +10,8 @@ export default defineConfig({
       '/api': {
         target: 'http://localhost:8080', // Spring Boot 서버 주소
         changeOrigin: true,
-      }
+      },
+      '/uploads': 'http://localhost:8080'
     }
   }
 })

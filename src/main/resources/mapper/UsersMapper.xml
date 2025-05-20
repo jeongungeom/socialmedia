@@ -34,15 +34,31 @@
 
     <select id="getMyPhoto" parameterType="long" resultType="com.sns.socialmedia.Dto.PhotoDto">
         SELECT
+            p.ID,
+            p.IMAGE_URL,
+            p.CAPTION,
+            p.CREATED_AT,
+            u.USERNAME,
+            u.PROFILE_PICTURE
+        FROM photos p
+                 INNER JOIN users u ON p.USER_ID = u.ID
+        WHERE p.USER_ID = #{userId}
+          AND p.HIDE_YN = 'N'
+          AND p.id = #{id}
+        ORDER BY p.CREATED_AT DESC
+    </select>
+
+    <select id="getMyPhotos" parameterType="long" resultType="com.sns.socialmedia.Dto.PhotoDto">
+        SELECT
             p.id,
             p.image_url,
             p.caption,
             p.created_at
         FROM photos p
-        WHERE p.user_id = #{id} AND p.hide_yn = 'N'
-        ORDER BY p.created_at DESC;
+        WHERE p.user_id = #{userId}
+          AND p.hide_yn = 'N'
+        ORDER BY p.created_at DESC
     </select>
-
     <!-- username으로 사용자 조회 -->
     <select id="findByUsername" parameterType="string" resultType="Users">
         SELECT ID, USERNAME, EMAIL, PASSWORD, BIO, PROFILE_PICTURE, CREATED_AT FROM users WHERE USERNAME = #{username} AND DELETE_YN = 'N'

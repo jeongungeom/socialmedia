@@ -73,8 +73,14 @@ public class UsersService {
         return usersMapper.findById(id);
     }
 
-    public PhotoDto getMyPhoto(Long id) {
-        return usersMapper.getMyPhoto(id);
+    // 게시물 단건 조회
+    public PhotoDto getMyPhoto(Long userId, Long id) {
+        return usersMapper.getMyPhoto(userId, id);
+    }
+
+    // 게시물 다건 조회
+    public List<PhotoDto> getMyPhotos(Long userId) {
+        return usersMapper.getMyPhotos(userId);
     }
 
     // 회원 정보 수정

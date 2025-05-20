@@ -30,7 +30,9 @@
     <!-- 게시물 삭제 -->
     <delete id="deletePhotos" parameterType="long">
         /* 게시물 id로 삭제 */
-        DELETE FROM photos WHERE ID = #{id}
+        DELETE FROM photos
+               WHERE USER_ID = #{userId}
+                 AND ID = #{id}
     </delete>
 
 

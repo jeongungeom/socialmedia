@@ -15,7 +15,8 @@ public interface UsersMapper {
     int updateUser(Users users); // 정보 수정
     int deleteUser(Long id); // 삭제
     ProfileDto findById(Long id); // id으로 사용자 조회
-    PhotoDto getMyPhoto(Long id);
+    PhotoDto getMyPhoto(Long userId, Long id);
+    List<PhotoDto> getMyPhotos(Long userId);
     Optional<Users> findByUsername(String username); // username으로 사용자 조회
     Optional<Users> findByUsernameNotMe(Users users); // username으로 사용자 조회
     Optional<Users> findByEmail(String email); // 이메일로 사용자 조회 (비밀번호 재설정 시 사용)

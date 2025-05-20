@@ -11,7 +11,7 @@
         </a>
       </li>
       <li><a href="#" class="nav-link"><i class="bi bi-heart me-3"></i>알림</a></li>
-      <li><a href="#" class="nav-link"><i class="bi bi-plus-square me-3"></i>포스팅</a></li>
+      <li><a href="#" class="nav-link" @click="goPost"><i class="bi bi-plus-square me-3"></i>포스팅</a></li>
       <li><a href="#" class="nav-link" @click="goProfile"><i class="bi bi-person-circle me-3"></i>프로필</a></li>
     </ul>
 
@@ -51,7 +51,7 @@
 
 <script setup>
 
-import {computed, ref, watch} from "vue";
+import { ref, watch} from "vue";
 import { useRouter } from 'vue-router'
 import api from "../api/axios.js";
 
@@ -89,11 +89,11 @@ const form = ref({
 })
 
 function goProfile() {
-  router.push("/profile")
+  router.push('/profile');
 }
 
 function goFeed() {
-  router.push("/feed")
+  router.push('/feed');
 }
 
 function goPage(id) {
@@ -101,6 +101,10 @@ function goPage(id) {
   router.push(`/profile/${id}`)
   searchQuery.value = '';
   searchResults.value = [];
+}
+
+function goPost() {
+  router.push('/post');
 }
 
 function closeSearchPanel() {
