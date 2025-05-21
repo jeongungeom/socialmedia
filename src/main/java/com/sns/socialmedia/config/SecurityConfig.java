@@ -60,7 +60,8 @@ public class SecurityConfig {
                                 "/api/follow/followings/**",
                                 "/api/photo/**",
                                 "/uploads/**",
-                                "/api/photo/delete/**"
+                                "/api/photo/delete/**",
+                                "/api/photo/update/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

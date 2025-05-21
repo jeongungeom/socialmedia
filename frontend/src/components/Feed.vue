@@ -11,44 +11,126 @@
           >
             <div class="card-header bg-white d-flex align-items-center">
               <img
-                  :src="post.user.avatar"
+                  :src="`/api/auth/image/${post.profilePicture}`"
                   class="rounded-circle me-2"
                   width="40"
                   height="40"
               >
-              <strong>{{ post.user.username }}</strong>
+              <strong>{{ post.username }}</strong>
             </div>
             <img
-                :src="post.image"
+                :src="encodeURI(post.imageUrl)"
                 class="card-img-top"
                 alt="게시물 이미지"
-                style="aspect-ratio: 4/5; object-fit: cover;"
+                style="aspect-ratio: 4/5; object-fit: cover; cursor: pointer"
+                @click="goDetail(post.id, post.userId)"
             >
             <div class="card-body">
               <div class="d-flex gap-3 mb-3">
                 <i class="bi bi-heart fs-5"></i>
                 <i class="bi bi-chat fs-5"></i>
-                <i class="bi bi-send fs-5"></i>
               </div>
               <p class="card-text">
-                <strong>{{ post.user.username }}</strong>
+                <strong>{{ post.username }}</strong>
                 {{ post.caption }}
               </p>
-              <small class="text-muted">{{ post.time }}</small>
+<!--              <small class="text-muted">{{ post.time }}</small>-->
             </div>
           </article>
         </div>
       </div>
     </main>
   </div>
+
+  <div v-if="showDetail" class="insta-post-modal-bg">
+    <div class="insta-post-modal">
+      <!-- X 닫기 버튼 -->
+      <button class="close-btn" @click="closeDetail" title="닫기">
+        <i class="bi bi-x-lg"></i>
+      </button>
+      <!-- 좌측: 게시글 이미지 -->
+      <div class="insta-post-image">
+        <img :src="photoOne.imageUrl" alt="게시물 이미지" />
+      </div>
+      <div class="insta-post-info">
+        <!-- 상단: 프로필/닉네임/옵션 -->
+        <div class="insta-post-header">
+          <img :src="`/api/auth/image/${photoOne.profilePicture}`" class="profile-img" alt="프로필" />
+          <span class="nickname">{{ photoOne.username }}</span>
+        </div>
+        <div class="header-divider"></div>
+        <div class="insta-post-content">
+          <p class="caption">
+            <span class="nickname">{{ photoOne.username }}</span>
+            {{ photoOne.caption }}
+          </p>
+        </div>
+        <!-- 하단: 좋아요/댓글/저장 아이콘 -->
+        <div class="insta-post-actions">
+          <button><i class="bi bi-heart"></i></button>
+          <button><i class="bi bi-chat"></i></button>
+        </div>
+        <small class="created-at">{{ photoOne.createdAt }}</small>
+        <!-- 댓글 입력: 내 프로필 사진 추가 -->
+        <form class="insta-post-comment-form" @submit.prevent="submitComment">
+          <input
+              v-model="comment"
+              type="text"
+              placeholder="댓글 달기..."
+              autocomplete="off"
+          />
+          <button type="submit" :disabled="!comment">게시</button>
+        </form>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import {onMounted, ref} from 'vue'
+import api from "../api/axios.js";
 
+const isMe = ref(false);
+const showDetail = ref(false);
+const comment = ref('');
 const posts = ref([
 
 ])
+const photoOne = ref();
+
+onMounted(async () => {
+  try {
+    const res = await api.get('/photo/allPhotos', {
+      headers: {Authorization: `Bearer ${localStorage.getItem('jwt')}`}
+    })
+    posts.value = res.data;
+  } catch (e) {
+    console.log(e.response.data);
+  }
+});
+
+async function goDetail(photoId, userId) {
+
+  try {
+    const res = await api.get('/auth/photoOne', {
+      params: { userId:  userId, id: photoId},
+      headers: { Authorization: `Bearer ${localStorage.getItem('jwt')}` }
+    });
+    showDetail.value = true
+    console.log(res.data);
+    photoOne.value = res.data;
+  } catch (e) {
+    console.log(e.response.data);
+  }
+}
+
+function closeDetail() {
+  showDetail.value = false
+}
+
+function submitComment() {
+  comment.value = ''
+}
 
 </script>
 
@@ -58,35 +140,228 @@ const posts = ref([
   background: #121212;
   color: #ddd;
 }
-.ig-sidebar {
-  background: rgba(20, 20, 20, 0.95);
-  border-color: rgba(255, 255, 255, 0.1);
-}
 .ig-main-feed {
   max-width: 700px;
   margin: 0 auto;
   color: #eee;
 }
-.nav-link {
-  color: #bbb !important;
-}
-.nav-link.active {
-  font-weight: 600;
-  color: #fff !important;
-}
 .card {
-  background: #1e1e1e;
+  background: #000 !important;
   border: none;
   color: #eee;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
 }
 .card-header {
-  background: transparent;
+  background: #000 !important;
   border-bottom: none;
   color: #eee;
 }
+
 .card-text {
   color: #ddd;
+}
+.insta-post-modal-bg {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.8);
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.insta-post-modal {
+  display: flex;
+  background: #181818;
+  border-radius: 14px;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.25);
+  max-width: 900px;
+  width: 90vw;
+  height: 70vh;
+  min-height: 420px;
+  overflow: hidden;
+}
+.insta-post-image {
+  flex: 1.1;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.insta-post-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #000;
+  max-height: 70vh;
+}
+.insta-post-info {
+  flex: 0.9;
+  display: flex;
+  flex-direction: column;
+  background: #181818;
+  color: #fff;
+  padding: 24px 18px 18px 18px;
+  min-width: 340px;
+  max-width: 400px;
+}
+.insta-post-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.profile-img {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.nickname {
+  font-weight: bold;
+  font-size: 1.07rem;
+}
+.option-btn {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: #ddd;
+  font-size: 1.3rem;
+  cursor: pointer;
+}
+.insta-post-content {
+  flex: 1;
+  margin-bottom: 12px;
+  overflow-y: auto;
+}
+.caption {
+  margin: 0 0 10px 0;
+  font-size: 1.08rem;
+  word-break: break-all;
+}
+.created-at {
+  color: #bbb;
+  font-size: 0.97rem;
+}
+.insta-post-actions {
+  display: flex;
+  gap: 18px;
+  margin-bottom: 12px;
+}
+.insta-post-actions button {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.4rem;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+.insta-post-actions button:hover {
+  color: #e1306c;
+}
+.insta-post-comment-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-top: 1px solid #232323;
+  padding-top: 10px;
+}
+.insta-post-comment-form input {
+  flex: 1;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.04rem;
+  padding: 8px 4px;
+  outline: none;
+}
+.insta-post-comment-form button {
+  background: none;
+  border: none;
+  color: #e1306c;
+  font-weight: bold;
+  font-size: 1.07rem;
+  cursor: pointer;
+  opacity: 0.9;
+  transition: opacity 0.12s;
+}
+.insta-post-comment-form button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+@media (max-width: 700px) {
+  .insta-post-modal { flex-direction: column; height: auto; max-width: 98vw; }
+  .insta-post-image, .insta-post-info { min-width: 0; max-width: none; width: 100%; }
+}
+.close-btn {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.6rem;
+  z-index: 10;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+.close-btn:hover {
+  color: #e1306c;
+}
+
+.option-dropdown-wrap {
+  position: relative;
+  display: inline-block;
+}
+.option-btn {
+  background: none;
+  border: none;
+  color: #ddd;
+  font-size: 1.3rem;
+  cursor: pointer;
+  margin-left: 10px;
+}
+.option-dropdown {
+  position: absolute;
+  top: 30px;
+  right: 0;
+  background: #232323;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+  min-width: 90px;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+}
+.option-dropdown button {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.02rem;
+  text-align: left;
+  padding: 10px 18px;
+  cursor: pointer;
+  transition: background 0.14s, color 0.14s;
+}
+.option-dropdown button:hover {
+  background: #181818;
+  color: #e1306c;
+}
+
+.insta-post-comment-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-top: 1px solid #232323;
+  padding-top: 10px;
+}
+.ig-main-feed {
+  max-width: 500px;
+  margin: 0 auto;
+  color: #eee;
+}
+.col-lg-6 {
+  max-width: 100%;
+  flex: 0 0 100%;
 }
 
 </style>

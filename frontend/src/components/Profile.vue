@@ -50,6 +50,7 @@
     </section>
   </div>
 
+<!-- 팔로워 모달 -->
   <div v-if="showFollowers" class="popup-overlay" @click.self="closeFollowers">
     <div class="popup-modal">
       <h4>팔로워</h4>
@@ -69,6 +70,7 @@
     </div>
   </div>
 
+<!-- 팔로잉 모달 -->
   <div v-if="showFollowings" class="popup-overlay" @click.self="closeFollowings">
     <div class="popup-modal">
       <h4>팔로잉</h4>
@@ -140,6 +142,30 @@
       </div>
     </div>
   </div>
+
+<!-- 수정 모달 -->
+  <div v-if="showEditModal" class="edit-post-modal-bg" @click.self="closeEditModal">
+    <div class="edit-post-modal">
+      <button class="close-btn" @click="closeEditModal" title="닫기">
+        <i class="bi bi-x-lg"></i>
+      </button>
+      <h3 class="edit-modal-title">게시글 수정</h3>
+      <form @submit.prevent="submitEdit" class="edit-post-form">
+        <div class="edit-image-preview">
+          <img :src="editPostData.imageUrl" alt="미리보기" />
+        </div>
+        <textarea
+            v-model="editCaption"
+            class="edit-caption-input"
+            maxlength="300"
+            placeholder="문구를 입력하세요 (최대 300자)"
+        ></textarea>
+        <button class="edit-post-btn" :disabled="isSaving" type="submit">
+          {{ isSaving ? '저장 중...' : '저장하기' }}
+        </button>
+      </form>
+    </div>
+  </div>
 </template>
 
 
@@ -151,6 +177,10 @@ import {useRoute, useRouter} from "vue-router";
 import api from "../api/axios.js";
 import {useUserStore} from "../stores/auth.js";
 
+const showEditModal = ref(false)
+const editPostData = ref({ id: null, imageUrl: '', caption: '' })
+const editCaption = ref('')
+const isSaving = ref(false)
 const showFollowers = ref(false);
 const showFollowings = ref(false);
 const isMe = ref(false);
@@ -358,8 +388,12 @@ function toggleMenu() {
 }
 function editPost() {
   showMenu.value = false
-
+  editPostData.value = { ...post.value };
+  editCaption.value = post.value.caption;
+  showEditModal.value = true
+  showDetail.value = false;
 }
+
 async function deletePost(id) {
   showMenu.value = false
   if (confirm('정말 삭제하시겠습니까?')) {
@@ -371,10 +405,43 @@ async function deletePost(id) {
     await handleMyProfile();
   }
 }
+
+function closeEditModal() {
+  showEditModal.value = false
+  editPostData.value = { id: null, imageUrl: '', caption: '' }
+  editCaption.value = ''
+}
+
+// 저장(수정)
+async function submitEdit() {
+  if (!editCaption.value.trim()) {
+    alert('내용을 입력하세요!')
+    return
+  }
+  isSaving.value = true
+  try {
+    await api.put(
+        `/photo/update/${editPostData.value.id}`,
+        { caption: editCaption.value },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('jwt')}`
+          }
+        }
+    )
+    alert('수정되었습니다!')
+    closeEditModal()
+  } catch (e) {
+    alert('수정 실패!')
+  } finally {
+    isSaving.value = false
+  }
+}
+
+
 function submitComment() {
   comment.value = ''
 }
-
 </script>
 
 <style scoped>
@@ -978,6 +1045,102 @@ function submitComment() {
 .option-dropdown button:hover {
   background: #181818;
   color: #e1306c;
+}
+.edit-post-modal-bg {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 4000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.edit-post-modal {
+  background: #181818;
+  border-radius: 16px;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.25);
+  width: 350px;
+  padding: 32px 28px 28px 28px;
+  color: #fff;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+.close-btn {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.6rem;
+  z-index: 10;
+  cursor: pointer;
+  transition: color 0.15s;
+  padding: 0;
+  line-height: 1;
+}
+.close-btn:hover {
+  color: #e1306c;
+}
+.edit-modal-title {
+  text-align: center;
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 18px;
+}
+.edit-image-preview {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  background: #232323;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.edit-image-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 12px;
+}
+.edit-caption-input {
+  width: 100%;
+  min-height: 80px;
+  background: #232323;
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 1.08rem;
+  padding: 12px 14px;
+  resize: vertical;
+  outline: none;
+  box-shadow: 0 0 0 1.5px #444 inset;
+  transition: box-shadow 0.16s;
+  margin-bottom: 20px;
+}
+.edit-caption-input:focus {
+  box-shadow: 0 0 0 2px #e1306c inset;
+}
+.edit-post-btn {
+  width: 100%;
+  background: linear-gradient(90deg, #e1306c 0%, #fdc468 100%);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 1.13rem;
+  padding: 12px 0;
+  cursor: pointer;
+  transition: background 0.18s;
+}
+.edit-post-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #444;
 }
 
 </style>

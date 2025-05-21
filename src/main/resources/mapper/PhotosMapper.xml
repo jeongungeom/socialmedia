@@ -20,9 +20,8 @@
 
     <!-- 게시물 수정 -->
     <update id="updatePhotos" parameterType="Photos">
-        /* 게시물(사진) 정보 수정 */
         UPDATE photos
-        SET IMAGE_URL = #{imageUrl},
+        SET
             CAPTION = #{caption}
         WHERE ID = #{id}
     </update>
@@ -35,5 +34,24 @@
                  AND ID = #{id}
     </delete>
 
+    <select id="getAllPhotos" parameterType="Long" resultType="com.sns.socialmedia.Dto.FeedDto">
+        SELECT
+            p.ID,
+            p.USER_ID,
+            p.IMAGE_URL,
+            p.CAPTION,
+            p.CREATED_AT,
+            u.USERNAME,
+            u.PROFILE_PICTURE
+        FROM photos p
+                 INNER JOIN users u ON p.USER_ID = u.ID
+        WHERE p.user_id = #{id}
+           OR p.user_id IN (
+            SELECT user_id
+            FROM follows
+            WHERE follower_id = #{id}
+        )
+        ORDER BY p.created_at DESC
+    </select>
 
 </mapper>

@@ -1,6 +1,7 @@
 package com.sns.socialmedia.service;
 
 
+import com.sns.socialmedia.Dto.FeedDto;
 import com.sns.socialmedia.mapper.PhotosMapper;
 import com.sns.socialmedia.model.Photos;
 import lombok.RequiredArgsConstructor;
@@ -30,13 +31,13 @@ public class PhotoService {
     }
 
     // 전체 게시물 조회
-    public List<Photos> findAll(){
-        return photosMapper.findAll();
+    public List<FeedDto> getAllPhotos(Long id){
+        return photosMapper.getAllPhotos(id);
     }
 
     // 게시물 수정
-    public int updatePhotos(Photos photo){
-        return photosMapper.updatePhotos(photo);
+    public void updatePhotos(Photos photo){
+        photosMapper.updatePhotos(photo);
     }
 
     // 게시물 삭제

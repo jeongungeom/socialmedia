@@ -1,20 +1,17 @@
 package com.sns.socialmedia.controller;
 
-import com.sns.socialmedia.enums.NotificationType;
-import com.sns.socialmedia.model.Notifications;
+import com.sns.socialmedia.Dto.FeedDto;
 import com.sns.socialmedia.model.Photos;
 import com.sns.socialmedia.service.PhotoService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -47,5 +44,17 @@ public class PhotoController {
     public void deletePhoto(HttpServletRequest request, @PathVariable("id") Long id) {
         Long userId = (Long) request.getAttribute("id");
         photoService.deletePhotos(userId, id);
+    }
+
+    @GetMapping("/allPhotos")
+    public List<FeedDto> getAllPhotos(HttpServletRequest request) {
+        Long id = (Long) request.getAttribute("id");
+        return photoService.getAllPhotos(id);
+    }
+
+    @PutMapping("/update/{id}")
+    public void update(@RequestBody Photos photos, @PathVariable("id") Long id) {
+        photos.setId(id);
+        photoService.updatePhotos(photos);
     }
 }

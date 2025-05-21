@@ -35,6 +35,7 @@
     <select id="getMyPhoto" parameterType="long" resultType="com.sns.socialmedia.Dto.PhotoDto">
         SELECT
             p.ID,
+            p.USER_ID,
             p.IMAGE_URL,
             p.CAPTION,
             p.CREATED_AT,
