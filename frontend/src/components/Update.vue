@@ -109,9 +109,7 @@ async function updateProfile() {
   }
 
   try {
-    const res = await api.post('/auth/update', formData, {
-      headers: { Authorization: `Bearer ${localStorage.getItem('jwt')}` }
-    })
+    const res = await api.post('/auth/update', formData)
     form.value.profilePicture = res.data.profilePicture;
     alert("수정완료");
   } catch (e) {
@@ -121,9 +119,7 @@ async function updateProfile() {
 
 onMounted(async () => {
   try {
-    const res = await api.get('/auth/profile', {
-      headers: { Authorization: `Bearer ${localStorage.getItem('jwt')}` }
-    })
+    const res = await api.get('/auth/profile')
     console.log(res.data);
     form.value = res.data
     console.log(form.value.profilePicture);
@@ -146,9 +142,7 @@ function deleteAccount() {
 
   if (confirm('정말 삭제하시겠습니까?')) {
     try {
-      api.put('/auth/deleteUser', form.value, {
-        headers: {Authorization: `Bearer ${localStorage.getItem('jwt')}`}
-      })
+      api.put('/auth/deleteUser', form.value)
       alert("삭제되었습니다.");
       success.value = true
       router.push("/")

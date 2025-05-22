@@ -95,7 +95,7 @@
           <button><i class="bi bi-chat"></i></button>
         </div>
         <small class="created-at">{{ photoOne.createdAt }}</small>
-        <!-- 댓글 입력: 내 프로필 사진 추가 -->
+        <!-- 댓글 입력 -->
         <form class="insta-post-comment-form" @submit.prevent="submitComment">
           <input
               v-model="comment"
@@ -137,9 +137,7 @@ onMounted(async () => {
 
 async function rendering() {
   try {
-    const res = await api.get('/photo/allPhotos', {
-      headers: {Authorization: `Bearer ${localStorage.getItem('jwt')}`}
-    })
+    const res = await api.get('/photo/allPhotos')
     posts.value = res.data;
   } catch (e) {
     console.log(e.response.data);
@@ -149,8 +147,7 @@ async function goDetail(photoId, userId) {
 
   try {
     const res = await api.get('/auth/photoOne', {
-      params: { userId:  userId, id: photoId},
-      headers: { Authorization: `Bearer ${localStorage.getItem('jwt')}` }
+      params: { userId:  userId, id: photoId}
     });
     showDetail.value = true
     console.log(res.data);
@@ -170,18 +167,13 @@ async function toggleLike(photoId) {
     // 좋아요 취소
     post.isLike = false
     photoOne.value.isLike = false;
-    await api.delete(`/like/deleteLike/${photoId}`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem('jwt')}` }
-    })
+    await api.delete(`/like/deleteLike/${photoId}`)
     await rendering();
   } else {
     // 좋아요 추가
     post.isLike = true
     photoOne.value.isLike = true;
-    await api.post('/like/addLike', { photoId: photoId }, {
-      headers: { Authorization: `Bearer ${localStorage.getItem('jwt')}` }
-    })
-    // 필요하다면 좋아요 수 갱신
+    await api.post('/like/addLike', { photoId: photoId })
     await rendering();
   }
 }

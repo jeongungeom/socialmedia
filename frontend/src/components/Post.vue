@@ -72,7 +72,6 @@ async function submitPost() {
   try {
     await api.post('/photo/upload', formData, {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem('jwt')}`,
         'Content-Type': 'multipart/form-data'
       }
     })

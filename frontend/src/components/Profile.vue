@@ -254,8 +254,8 @@ async function handleMyProfile() {
   }
 
   const [profileRes, photoRes] = await Promise.all([
-    api.get('/auth/profile', { headers: { Authorization: `Bearer ${token}` } }),
-    api.get('/auth/photos', { headers: { Authorization: `Bearer ${token}` } })
+    api.get('/auth/profile'),
+    api.get('/auth/photos')
   ]);
   userStore.setUser(profileRes.data);
   user.value = profileRes.data;
@@ -274,8 +274,7 @@ async function handleUserProfile(userId) {
 
 async function isFollow(profileId) {
   const res = await api.get('/follow/isFollowing', {
-    params: { userId:  profileId },
-    headers: { Authorization: `Bearer ${localStorage.getItem('jwt')}` }
+    params: { userId:  profileId }
   });
 
   isFollowing.value = res.data;
@@ -312,9 +311,7 @@ async function toggleFollow(isValid) {
 
 async function addFollow() {
   try {
-    await api.post(`/follow/${route.params.id}`, null, {
-      headers: { Authorization: `Bearer ${localStorage.getItem('jwt')}` }
-    });
+    await api.post(`/follow/${route.params.id}`, null, );
     await isFollow(route.params.id);
     await handleUserProfile(route.params.id);
   } catch (e) {
@@ -324,9 +321,7 @@ async function addFollow() {
 
 async function deleteFollow() {
   try {
-    await api.delete(`/follow/${route.params.id}`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem('jwt')}` }
-    });
+    await api.delete(`/follow/${route.params.id}`);
     await isFollow(route.params.id);
     await handleUserProfile(route.params.id);
   } catch (e) {
@@ -337,9 +332,7 @@ async function deleteFollow() {
 async function getFollowers() {
   const userId = route.params.id ? route.params.id : userStore.id;
   try {
-    const followerRes = await api.get(`/follow/followers/${userId}`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem('jwt')}` }
-    });
+    const followerRes = await api.get(`/follow/followers/${userId}`);
     showFollowers.value = true
     follows.value = followerRes.data;
   } catch (e) {
@@ -350,9 +343,7 @@ async function getFollowers() {
 async function getFollowings() {
   const userId = route.params.id ? route.params.id : userStore.id;
   try {
-    const followingRes = await api.get(`/follow/followings/${userId}`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem('jwt')}` }
-    });
+    const followingRes = await api.get(`/follow/followings/${userId}`);
     showFollowings.value = true
     follows.value = followingRes.data;
   } catch (e) {
@@ -378,8 +369,7 @@ async function goDetail(photoId) {
 
   try {
     const res = await api.get('/auth/photoOne', {
-      params: { userId:  userId, id: photoId},
-      headers: { Authorization: `Bearer ${localStorage.getItem('jwt')}` }
+      params: {userId: userId, id: photoId}
     });
     showDetail.value = true
     post.value = res.data;
@@ -406,9 +396,7 @@ function editPost() {
 async function deletePost(id) {
   showMenu.value = false
   if (confirm('정말 삭제하시겠습니까?')) {
-    await api.delete(`/photo/delete/${id}`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem('jwt')}` }
-    })
+    await api.delete(`/photo/delete/${id}`)
     alert('삭제되었습니다!')
     showDetail.value=false;
     await handleMyProfile();
@@ -431,12 +419,7 @@ async function submitEdit() {
   try {
     await api.put(
         `/photo/update/${editPostData.value.id}`,
-        { caption: editCaption.value },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('jwt')}`
-          }
-        }
+        { caption: editCaption.value }
     )
     alert('수정되었습니다!')
     closeEditModal()
@@ -451,16 +434,12 @@ async function toggleLike(photoId) {
   if (post.isLike) {
     // 좋아요 취소
     post.isLike = false
-    await api.delete(`/like/deleteLike/${photoId}`, {
-      headers: {Authorization: `Bearer ${localStorage.getItem('jwt')}`}
-    })
+    await api.delete(`/like/deleteLike/${photoId}`, )
     await goDetail(photoId);
   } else {
     // 좋아요 추가
     post.isLike = true
-    await api.post('/like/addLike', {photoId: photoId}, {
-      headers: {Authorization: `Bearer ${localStorage.getItem('jwt')}`}
-    })
+    await api.post('/like/addLike', {photoId: photoId})
     await goDetail(photoId);
   }
 }

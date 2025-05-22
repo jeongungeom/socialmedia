@@ -72,8 +72,7 @@ watch(searchQuery, (newVal) => {
     try {
       const res = await api.get('/auth/searchUser',
           {
-            params: {keyword: newVal},
-            headers: {Authorization: `Bearer ${localStorage.getItem('jwt')}`}
+            params: {keyword: newVal}
           }
       )
       searchResults.value = res.data
