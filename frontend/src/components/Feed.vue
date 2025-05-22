@@ -440,8 +440,9 @@ function submitComment() {
 .comment-btn i {
   color: #fff;
 }
-.comment-btn:hover i {
-  color: #fdc468;
+button .bi.bi-chat,
+button .bi.bi-chat:hover {
+  color: #fff !important;   /* 원하는 색상으로 고정 */
+  transition: color 0.15s;
 }
-
 </style>

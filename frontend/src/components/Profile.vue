@@ -1199,5 +1199,9 @@ function submitComment() {
   font-size: 1.07rem;
   vertical-align: middle;
 }
-
+button .bi.bi-chat,
+button .bi.bi-chat:hover {
+  color: #fff !important;   /* 원하는 색상으로 고정 */
+  transition: color 0.15s;
+}
 </style>
