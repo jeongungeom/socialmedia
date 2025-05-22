@@ -44,35 +44,7 @@ public class SecurityConfig {
 
                 // 모든 요청을 허용하되 인증이 필요할 땐 401만 던져주세요
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/api/auth/register",
-                                "/api/auth/signup",
-                                "/api/auth/login",
-                                "/api/auth/signin",
-                                "/api/auth/image/**",
-                                "/api/auth/searchUser/**",
-                                "/api/auth/profile/**",
-                                "/api/auth/photo/**",
-                                "/api/auth/photos/**",
-                                "/api/auth/photoOne/**",
-                                "/api/follow/**",
-                                "/api/follow/followers/**",
-                                "/api/follow/followings/**",
-                                "/api/photo/**",
-                                "/uploads/**",
-                                "/api/photo/delete/**",
-                                "/api/photo/update/**",
-                                "/api/like/**",
-                                "/api/like/countLikes/**",
-                                "/api/like/deleteLike/**",
-                                "/api/like/likeList/**",
-                                "/api/like/addLike",
-                                "/api/comment/insertComment",
-                                "/api/comment/updateComment",
-                                "/api/comment/deleteComment",
-                                "/api/comment/getCommentList/**"
-                        ).permitAll()
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll()
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
 
