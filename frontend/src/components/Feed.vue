@@ -42,6 +42,7 @@
                     class="comment-btn"
                     style="background: none; border: none; padding: 0;"
                     title="댓글"
+                    @click="goDetail(post.id, post.userId)"
                 >
                   <i class="bi bi-chat fs-5"></i>
                 </button>
