@@ -150,15 +150,13 @@ async function goDetail(photoId, userId) {
       params: { userId:  userId, id: photoId}
     });
     showDetail.value = true
-    console.log(res.data);
     photoOne.value = res.data;
-    // if(photoOne.value.isLike === 0) {
-    //   photoOne.value.isLike = false;
-    // }
+    console.log(photoOne.value)
   } catch (e) {
     console.log(e.response.data);
   }
 }
+
 
 async function toggleLike(photoId) {
   const post = posts.value.find(p => p.id === photoId)
@@ -168,13 +166,13 @@ async function toggleLike(photoId) {
     post.isLike = false
     photoOne.value.isLike = false;
     await api.delete(`/like/deleteLike/${photoId}`)
-    await rendering();
+    await goDetail(photoId, post.userId);
   } else {
     // 좋아요 추가
     post.isLike = true
     photoOne.value.isLike = true;
     await api.post('/like/addLike', { photoId: photoId })
-    await rendering();
+    await goDetail(photoId, post.userId);
   }
 }
 
