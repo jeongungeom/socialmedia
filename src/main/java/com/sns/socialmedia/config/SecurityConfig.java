@@ -66,7 +66,11 @@ public class SecurityConfig {
                                 "/api/like/countLikes/**",
                                 "/api/like/deleteLike/**",
                                 "/api/like/likeList/**",
-                                "/api/like/addLike"
+                                "/api/like/addLike",
+                                "/api/comment/insertComment",
+                                "/api/comment/updateComment",
+                                "/api/comment/deleteComment",
+                                "/api/comment/getCommentList/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
