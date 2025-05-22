@@ -125,7 +125,15 @@
         </div>
         <!-- 하단: 좋아요/댓글/저장 아이콘 -->
         <div class="insta-post-actions">
-          <button><i class="bi bi-heart"></i></button>
+          <!-- 좋아요 버튼과 숫자 -->
+          <button
+              @click="toggleLike(post.id)"
+              :class="{ liked: post.isLike }"
+              class="like-btn"
+          >
+            <i :class="post.isLike ? 'bi-heart-fill' : 'bi-heart'"></i>
+          </button>
+          <span v-if="post.likeCnt > 0" class="like-count">{{ post.likeCnt }}</span>
           <button><i class="bi bi-chat"></i></button>
         </div>
         <small class="created-at">{{ post.createdAt }}</small>
@@ -218,8 +226,9 @@ const post = ref({
     username: '',
     caption: '',
     createdAt : '',
+    likeCnt : '',
+    isLike : ''
 })
-
 
 
 const photos = ref([]);
@@ -435,6 +444,24 @@ async function submitEdit() {
     alert('수정 실패!')
   } finally {
     isSaving.value = false
+  }
+}
+
+async function toggleLike(photoId) {
+  if (post.isLike) {
+    // 좋아요 취소
+    post.isLike = false
+    await api.delete(`/like/deleteLike/${photoId}`, {
+      headers: {Authorization: `Bearer ${localStorage.getItem('jwt')}`}
+    })
+    await goDetail(photoId);
+  } else {
+    // 좋아요 추가
+    post.isLike = true
+    await api.post('/like/addLike', {photoId: photoId}, {
+      headers: {Authorization: `Bearer ${localStorage.getItem('jwt')}`}
+    })
+    await goDetail(photoId);
   }
 }
 
@@ -1141,6 +1168,36 @@ function submitComment() {
   opacity: 0.5;
   cursor: not-allowed;
   background: #444;
+}
+
+.like-btn.liked,
+.like-btn.liked .bi-heart-fill {
+  color: #e1306c; /* 인스타그램 핑크 */
+}
+.like-btn .bi-heart {
+  color: #fff;
+}
+.like-btn .bi-heart-fill {
+  color: #e1306c;
+}
+
+.like-btn {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: color 0.18s;
+  vertical-align: middle;
+  padding: 0 2px 0 0;
+}
+
+.like-count {
+  font-weight: 500;
+  color: #fff;
+  margin-left: -10px;
+  font-size: 1.07rem;
+  vertical-align: middle;
 }
 
 </style>

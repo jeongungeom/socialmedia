@@ -42,7 +42,11 @@
             p.CAPTION,
             p.CREATED_AT,
             u.USERNAME,
-            u.PROFILE_PICTURE
+            u.PROFILE_PICTURE,
+            (SELECT COUNT(*) FROM likes l WHERE l.photo_id = p.ID) AS likeCnt,
+            EXISTS (
+                SELECT 1 FROM likes l2 WHERE l2.photo_id = p.ID AND l2.user_id = #{id}
+            ) AS isLike
         FROM photos p
                  INNER JOIN users u ON p.USER_ID = u.ID
         WHERE p.user_id = #{id}
@@ -52,6 +56,7 @@
             WHERE follower_id = #{id}
         )
         ORDER BY p.created_at DESC
+
     </select>
 
 </mapper>

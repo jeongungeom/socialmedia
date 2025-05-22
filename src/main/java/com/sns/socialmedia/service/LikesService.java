@@ -13,13 +13,13 @@ public class LikesService {
     private final LikesMapper likesMapper;
 
     // 좋아요 등록
-    public int insertLike(Likes like) {
-        return likesMapper.insertLike(like);
+    public void insertLike(Likes like) {
+        likesMapper.insertLike(like);
     }
 
     // 좋아요 취소
-    public int deleteLike(Long userId, Long postId) {
-        return likesMapper.deleteLike(userId, postId);
+    public void deleteLike(Long userId, Long postId) {
+        likesMapper.deleteLike(userId, postId);
     }
 
     // 게시물별 좋아요 수 조회

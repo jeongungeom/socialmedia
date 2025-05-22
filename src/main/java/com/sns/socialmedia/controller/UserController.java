@@ -81,8 +81,10 @@ public class UserController {
 
     // 게시물 단건 조회 통합
     @GetMapping("/photoOne")
-    public PhotoDto getPhotoOne(@RequestParam("userId") Long userId, @RequestParam("id") Long id) {
-        return usersService.getMyPhoto(userId, id);
+    public PhotoDto getPhotoOne(HttpServletRequest request, @RequestParam("userId") Long userId, @RequestParam("id") Long id) {
+        Long myId = (Long) request.getAttribute("id");
+        boolean isMyId = myId.equals(userId);
+        return usersService.getMyPhoto(userId, id, myId, isMyId);
     }
 
 

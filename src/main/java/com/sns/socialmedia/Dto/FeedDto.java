@@ -16,4 +16,6 @@ public class FeedDto {
     private String caption;
     private String username;
     private String profilePicture;
+    private int likeCnt;
+    private int isLike;
 }

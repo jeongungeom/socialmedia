@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Likes {
-    private long id;
+    private long userId;
     private long photoId;
     private LocalDateTime createdAt;
 }

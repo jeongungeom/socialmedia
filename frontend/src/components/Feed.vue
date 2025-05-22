@@ -26,15 +26,30 @@
                 @click="goDetail(post.id, post.userId)"
             >
             <div class="card-body">
-              <div class="d-flex gap-3 mb-3">
-                <i class="bi bi-heart fs-5"></i>
-                <i class="bi bi-chat fs-5"></i>
+              <div class="d-flex align-items-center gap-2 mb-3">
+                <!-- 좋아요 버튼과 숫자 -->
+                <button
+                    @click="toggleLike(post.id)"
+                    :class="['like-btn', { liked: post.isLike }]"
+                    style="background: none; border: none; padding: 0; margin-right: 3px;"
+                >
+                  <i :class="post.isLike ? 'bi-heart-fill fs-5' : 'bi-heart fs-5'"></i>
+                </button>
+                <span v-if="post.likeCnt > 0" class="like-count" style="font-size:1.07rem; margin-right: 12px;">
+      {{ post.likeCnt }}
+    </span>
+                <button
+                    class="comment-btn"
+                    style="background: none; border: none; padding: 0;"
+                    title="댓글"
+                >
+                  <i class="bi bi-chat fs-5"></i>
+                </button>
               </div>
               <p class="card-text">
                 <strong>{{ post.username }}</strong>
                 {{ post.caption }}
               </p>
-<!--              <small class="text-muted">{{ post.time }}</small>-->
             </div>
           </article>
         </div>
@@ -67,7 +82,15 @@
         </div>
         <!-- 하단: 좋아요/댓글/저장 아이콘 -->
         <div class="insta-post-actions">
-          <button><i class="bi bi-heart"></i></button>
+          <!-- 좋아요 버튼과 숫자 -->
+          <button
+              @click="toggleLike(photoOne.id)"
+              :class="{ liked: photoOne.isLike }"
+              class="like-btn"
+          >
+            <i :class="photoOne.isLike ? 'bi-heart-fill' : 'bi-heart'"></i>
+          </button>
+          <span v-if="photoOne.likeCnt > 0" class="like-count">{{ photoOne.likeCnt }}</span>
           <button><i class="bi bi-chat"></i></button>
         </div>
         <small class="created-at">{{ photoOne.createdAt }}</small>
@@ -96,9 +119,22 @@ const comment = ref('');
 const posts = ref([
 
 ])
-const photoOne = ref();
+const photoOne = ref({
+  id: '',
+  imageUrl: '',
+  profilePicture: '',
+  username: '',
+  caption: '',
+  createdAt: '',
+  likeCnt: 0,
+  isLike: false
+})
 
 onMounted(async () => {
+  await rendering();
+});
+
+async function rendering() {
   try {
     const res = await api.get('/photo/allPhotos', {
       headers: {Authorization: `Bearer ${localStorage.getItem('jwt')}`}
@@ -107,8 +143,7 @@ onMounted(async () => {
   } catch (e) {
     console.log(e.response.data);
   }
-});
-
+}
 async function goDetail(photoId, userId) {
 
   try {
@@ -119,8 +154,34 @@ async function goDetail(photoId, userId) {
     showDetail.value = true
     console.log(res.data);
     photoOne.value = res.data;
+    // if(photoOne.value.isLike === 0) {
+    //   photoOne.value.isLike = false;
+    // }
   } catch (e) {
     console.log(e.response.data);
+  }
+}
+
+async function toggleLike(photoId) {
+  const post = posts.value.find(p => p.id === photoId)
+
+  if (post.isLike) {
+    // 좋아요 취소
+    post.isLike = false
+    photoOne.value.isLike = false;
+    await api.delete(`/like/deleteLike/${photoId}`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('jwt')}` }
+    })
+    await rendering();
+  } else {
+    // 좋아요 추가
+    post.isLike = true
+    photoOne.value.isLike = true;
+    await api.post('/like/addLike', { photoId: photoId }, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('jwt')}` }
+    })
+    // 필요하다면 좋아요 수 갱신
+    await rendering();
   }
 }
 
@@ -362,6 +423,25 @@ function submitComment() {
 .col-lg-6 {
   max-width: 100%;
   flex: 0 0 100%;
+}
+.like-btn.liked i {
+  color: #e1306c;
+}
+.like-btn i {
+  color: #fff;
+  transition: color 0.16s;
+}
+.like-count {
+  color: #fff;
+  font-weight: 500;
+  margin-left: -2px;
+  vertical-align: middle;
+}
+.comment-btn i {
+  color: #fff;
+}
+.comment-btn:hover i {
+  color: #fdc468;
 }
 
 </style>

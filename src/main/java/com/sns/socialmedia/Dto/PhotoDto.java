@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 @Setter
 @Getter
 @NoArgsConstructor
-@AllArgsConstructor
 public class PhotoDto {
     private int id;
     private String imageUrl;
@@ -20,4 +19,6 @@ public class PhotoDto {
     private LocalDateTime createdAt;
     private String username;
     private String profilePicture;
+    private int likeCnt;
+    private int isLike;
 }

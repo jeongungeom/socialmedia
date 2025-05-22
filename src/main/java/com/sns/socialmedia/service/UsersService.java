@@ -24,9 +24,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -74,8 +72,13 @@ public class UsersService {
     }
 
     // 게시물 단건 조회
-    public PhotoDto getMyPhoto(Long userId, Long id) {
-        return usersMapper.getMyPhoto(userId, id);
+    public PhotoDto getMyPhoto(Long userId, Long id, Long myId ,boolean isMyId) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("userId", userId);
+        params.put("id", id);
+        params.put("myId", myId);
+        params.put("isMyId", isMyId);
+        return usersMapper.getMyPhoto(params);
     }
 
     // 게시물 다건 조회

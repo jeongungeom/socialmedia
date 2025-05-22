@@ -61,7 +61,12 @@ public class SecurityConfig {
                                 "/api/photo/**",
                                 "/uploads/**",
                                 "/api/photo/delete/**",
-                                "/api/photo/update/**"
+                                "/api/photo/update/**",
+                                "/api/like/**",
+                                "/api/like/countLikes/**",
+                                "/api/like/deleteLike/**",
+                                "/api/like/likeList/**",
+                                "/api/like/addLike"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

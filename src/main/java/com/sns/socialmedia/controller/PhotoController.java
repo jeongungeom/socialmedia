@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -49,6 +50,7 @@ public class PhotoController {
     @GetMapping("/allPhotos")
     public List<FeedDto> getAllPhotos(HttpServletRequest request) {
         Long id = (Long) request.getAttribute("id");
+        List<FeedDto> list = new ArrayList<>();
         return photoService.getAllPhotos(id);
     }
 

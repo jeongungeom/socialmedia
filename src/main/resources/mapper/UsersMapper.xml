@@ -32,7 +32,7 @@
         AND DELETE_YN = 'N'
     </select>
 
-    <select id="getMyPhoto" parameterType="long" resultType="com.sns.socialmedia.Dto.PhotoDto">
+    <select id="getMyPhoto" parameterType="map" resultType="com.sns.socialmedia.Dto.PhotoDto">
         SELECT
             p.ID,
             p.USER_ID,
@@ -40,10 +40,17 @@
             p.CAPTION,
             p.CREATED_AT,
             u.USERNAME,
-            u.PROFILE_PICTURE
+            u.PROFILE_PICTURE,
+            (SELECT COUNT(*) FROM likes WHERE PHOTO_ID = #{id} ) AS likeCnt,
+            EXISTS( SELECT 1 FROM likes WHERE photo_id = #{id} AND user_id = #{myId}) AS isLike
         FROM photos p
                  INNER JOIN users u ON p.USER_ID = u.ID
-        WHERE p.USER_ID = #{userId}
+        WHERE p.USER_ID = (
+            CASE
+                WHEN #{isMyId} = TRUE THEN #{myId}
+                ELSE #{userId}
+                END
+            )
           AND p.HIDE_YN = 'N'
           AND p.id = #{id}
         ORDER BY p.CREATED_AT DESC
