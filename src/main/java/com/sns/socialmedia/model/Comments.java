@@ -1,5 +1,6 @@
 package com.sns.socialmedia.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,5 +17,14 @@ public class Comments {
     private String commentText;
     private long userId;
     private long photoId;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDateTime createdAt;
+    private String username;
+    private String profilePicture;
+
+    public Comments(String commentText, long userId, long photoId) {
+        this.commentText = commentText;
+        this.userId = userId;
+        this.photoId = photoId;
+    }
 }

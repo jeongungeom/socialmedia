@@ -2,7 +2,7 @@ package com.sns.socialmedia.controller;
 
 import com.sns.socialmedia.Dto.PhotoDto;
 import com.sns.socialmedia.Dto.ProfileDto;
-import com.sns.socialmedia.mapper.UsersMapper;
+import com.sns.socialmedia.Dto.TotalPhotoDto;
 import com.sns.socialmedia.model.Users;
 import com.sns.socialmedia.service.UsersService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -81,7 +81,7 @@ public class UserController {
 
     // 게시물 단건 조회 통합
     @GetMapping("/photoOne")
-    public PhotoDto getPhotoOne(HttpServletRequest request, @RequestParam("userId") Long userId, @RequestParam("id") Long id) {
+    public TotalPhotoDto getPhotoOne(HttpServletRequest request, @RequestParam("userId") Long userId, @RequestParam("id") Long id) {
         Long myId = (Long) request.getAttribute("id");
         boolean isMyId = myId.equals(userId);
         return usersService.getMyPhoto(userId, id, myId, isMyId);

@@ -3,8 +3,11 @@ package com.sns.socialmedia.service;
 
 import com.sns.socialmedia.Dto.PhotoDto;
 import com.sns.socialmedia.Dto.ProfileDto;
+import com.sns.socialmedia.Dto.TotalPhotoDto;
 import com.sns.socialmedia.exception.DuplicateUserException;
+import com.sns.socialmedia.mapper.CommentsMapper;
 import com.sns.socialmedia.mapper.UsersMapper;
+import com.sns.socialmedia.model.Comments;
 import com.sns.socialmedia.model.Users;
 import com.sns.socialmedia.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +41,8 @@ public class UsersService {
     private JwtUtil jwtUtil;
     @Value("${profile.upload.dir}")
     private String uploadDir;
+    @Autowired
+    private CommentsMapper commentsMapper;
 
     // 회원가입 및 아이디 중복 체크
     public void checkValid(Users users) {
@@ -72,13 +77,20 @@ public class UsersService {
     }
 
     // 게시물 단건 조회
-    public PhotoDto getMyPhoto(Long userId, Long id, Long myId ,boolean isMyId) {
+    public TotalPhotoDto getMyPhoto(Long userId, Long id, Long myId , boolean isMyId) {
+        TotalPhotoDto totalPhotoDto = new TotalPhotoDto();
+
         Map<String, Object> params = new HashMap<>();
         params.put("userId", userId);
         params.put("id", id);
         params.put("myId", myId);
         params.put("isMyId", isMyId);
-        return usersMapper.getMyPhoto(params);
+        PhotoDto photoDto = usersMapper.getMyPhoto(params);
+        List<Comments> commentsList = commentsMapper.findMyPhotoId(id);
+
+        totalPhotoDto.setPhotoDto(photoDto);
+        totalPhotoDto.setCommentsList(commentsList);
+        return totalPhotoDto;
     }
 
     // 게시물 다건 조회

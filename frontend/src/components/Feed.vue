@@ -23,7 +23,7 @@
                 class="card-img-top"
                 alt="게시물 이미지"
                 style="aspect-ratio: 4/5; object-fit: cover; cursor: pointer"
-                @click="goDetail(post.id, post.userId)"
+                @click="goDetail(post.id, post.userId, true)"
             >
             <div class="card-body">
               <div class="d-flex align-items-center gap-2 mb-3">
@@ -42,7 +42,7 @@
                     class="comment-btn"
                     style="background: none; border: none; padding: 0;"
                     title="댓글"
-                    @click="goDetail(post.id, post.userId)"
+                    @click="goDetail(post.id, post.userId, true)"
                 >
                   <i class="bi bi-chat fs-5"></i>
                 </button>
@@ -58,7 +58,7 @@
     </main>
   </div>
 
-  <div v-if="showDetail" class="insta-post-modal-bg">
+  <div v-if="showDetail && photoOne.id" class="insta-post-modal-bg">
     <div class="insta-post-modal">
       <!-- X 닫기 버튼 -->
       <button class="close-btn" @click="closeDetail" title="닫기">
@@ -76,10 +76,36 @@
         </div>
         <div class="header-divider"></div>
         <div class="insta-post-content">
-          <p class="caption">
-            <span class="nickname">{{ photoOne.username }}</span>
-            {{ photoOne.caption }}
-          </p>
+          <ul class="caption-and-comments">
+            <li class="caption-item">
+              <img :src="`/api/auth/image/${photoOne.profilePicture}`" class="comment-profile-img" alt="프로필" />
+              <div class="comment-content">
+                <span class="comment-nickname">{{ photoOne.username }}</span>
+                <span class="comment-text">{{ photoOne.caption }}</span>
+              </div>
+            </li>
+            <li
+                v-for="comment in commentList"
+                :key="comment.id"
+                class="comment-item"
+            >
+              <img :src="`/api/auth/image/${comment.profilePicture}`" class="comment-profile-img" alt="댓글 프로필" />
+              <div class="comment-content">
+                <span class="comment-nickname">{{ comment.username }}</span>
+                <span class="comment-text">{{ comment.commentText }}</span>
+                <div class="comment-date">{{ comment.createdAt }}</div>
+              </div>
+              <button
+                  v-if="comment.userId === userStore.id"
+                  class="delete-comment-btn"
+                  @click="deleteComment(comment.id, photoOne.id, photoOne.userId)"
+                  title="댓글 삭제"
+              >
+                <i class="bi bi-trash"></i>
+              </button>
+            </li>
+          </ul>
+
         </div>
         <!-- 하단: 좋아요/댓글/저장 아이콘 -->
         <div class="insta-post-actions">
@@ -96,7 +122,7 @@
         </div>
         <small class="created-at">{{ photoOne.createdAt }}</small>
         <!-- 댓글 입력 -->
-        <form class="insta-post-comment-form" @submit.prevent="submitComment">
+        <form class="insta-post-comment-form" @submit.prevent="submitComment(photoOne.id, photoOne.userId)">
           <input
               v-model="comment"
               type="text"
@@ -113,8 +139,9 @@
 <script setup>
 import {onMounted, ref} from 'vue'
 import api from "../api/axios.js";
+import {useUserStore} from "../stores/auth.js";
 
-const isMe = ref(false);
+const userStore = useUserStore();
 const showDetail = ref(false);
 const comment = ref('');
 const posts = ref([
@@ -122,6 +149,7 @@ const posts = ref([
 ])
 const photoOne = ref({
   id: '',
+  userId: '',
   imageUrl: '',
   profilePicture: '',
   username: '',
@@ -130,6 +158,8 @@ const photoOne = ref({
   likeCnt: 0,
   isLike: false
 })
+
+const commentList =  ref([])
 
 onMounted(async () => {
   await rendering();
@@ -143,17 +173,19 @@ async function rendering() {
     console.log(e.response.data);
   }
 }
-async function goDetail(photoId, userId) {
+async function goDetail(photoId, userId, valid) {
 
   try {
     const res = await api.get('/auth/photoOne', {
       params: { userId:  userId, id: photoId}
     });
-    showDetail.value = true
-    photoOne.value = res.data;
-    console.log(photoOne.value)
+    if(valid) {
+      showDetail.value = true
+    }
+    photoOne.value = res.data.photoDto;
+    commentList.value = res.data.commentsList;
   } catch (e) {
-    console.log(e.response.data);
+    console.log(e.response);
   }
 }
 
@@ -166,13 +198,15 @@ async function toggleLike(photoId) {
     post.isLike = false
     photoOne.value.isLike = false;
     await api.delete(`/like/deleteLike/${photoId}`)
-    await goDetail(photoId, post.userId);
+    await goDetail(photoId, post.userId, false);
+    await rendering();
   } else {
     // 좋아요 추가
     post.isLike = true
     photoOne.value.isLike = true;
     await api.post('/like/addLike', { photoId: photoId })
-    await goDetail(photoId, post.userId);
+    await goDetail(photoId, post.userId, false);
+    await rendering();
   }
 }
 
@@ -180,8 +214,25 @@ function closeDetail() {
   showDetail.value = false
 }
 
-function submitComment() {
-  comment.value = ''
+async function submitComment(photoId, userId) {
+  try {
+    await api.post("/comment/insertComment",
+        {
+          commentText: comment.value, photoId: photoId
+        });
+    comment.value = ''
+   await goDetail(photoId, userId, true)
+  }catch (e) {
+    console.log(e)
+  }
+}
+
+async function deleteComment(commentId, photoId, userId) {
+  if (confirm('정말 이 댓글을 삭제하시겠습니까?')) {
+    await api.delete(`/comment/deleteComment/${commentId}`)
+    // 댓글 삭제 후 최신 댓글 목록 다시 불러오기
+    await goDetail(photoId, userId, false);
+  }
 }
 
 </script>
@@ -431,9 +482,94 @@ function submitComment() {
 .comment-btn i {
   color: #fff;
 }
+.header-divider {
+  width: 100%;
+  height: 1px;
+  background: #2d2d2d; /* 적당한 회색 */
+  margin: 12px 0 16px 0;
+  border: none;
+}
 button .bi.bi-chat,
 button .bi.bi-chat:hover {
   color: #fff !important;   /* 원하는 색상으로 고정 */
   transition: color 0.15s;
 }
+.comment-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.comment-profile-img {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  margin-right: 8px;
+}
+.comment-nickname {
+  font-weight: bold;
+  margin-right: 6px;
+}
+.comment-text {
+  margin-right: 8px;
+}
+.comment-date {
+  color: #aaa;
+  font-size: 0.85em;
+  margin-left: auto;
+}
+.caption-and-comments {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 12px 0;
+}
+.caption-item, .comment-item {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 10px;
+  position: relative;
+}
+.comment-profile-img {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  margin-right: 8px;
+  margin-top: 2px;
+}
+.comment-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.comment-nickname {
+  font-weight: bold;
+  margin-right: 6px;
+}
+.comment-text {
+  margin-right: 8px;
+  word-break: break-all;
+}
+.comment-date {
+  color: #aaa;
+  font-size: 0.85em;
+  margin-top: 2px;
+  margin-left: 0; /* 왼쪽 정렬 */
+}
+.delete-comment-btn {
+  background: none;
+  border: none;
+  color: #e1306c;
+  cursor: pointer;
+  font-size: 1.1em;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+  position: absolute;
+  right: 0;
+  top: 10px;
+}
+.delete-comment-btn:hover {
+  opacity: 1;
+  color: #ff1744;
+}
+
 </style>

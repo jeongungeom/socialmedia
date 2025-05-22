@@ -118,10 +118,35 @@
         </div>
         <div class="header-divider"></div>
         <div class="insta-post-content">
-          <p class="caption">
-            <span class="nickname">{{ post.username }}</span>
-            {{ post.caption }}
-          </p>
+          <ul class="caption-and-comments">
+            <li class="caption-item">
+              <img :src="`/api/auth/image/${post.profilePicture}`" class="comment-profile-img" alt="프로필" />
+              <div class="comment-content">
+                <span class="comment-nickname">{{ post.username }}</span>
+                <span class="comment-text">{{ post.caption }}</span>
+              </div>
+            </li>
+            <li
+                v-for="comment in commentList"
+                :key="comment.id"
+                class="comment-item"
+            >
+              <img :src="`/api/auth/image/${comment.profilePicture}`" class="comment-profile-img" alt="댓글 프로필" />
+              <div class="comment-content">
+                <span class="comment-nickname">{{ comment.username }}</span>
+                <span class="comment-text">{{ comment.commentText }}</span>
+                <div class="comment-date">{{ comment.createdAt }}</div>
+              </div>
+              <button
+                  v-if="comment.userId === userStore.id"
+                  class="delete-comment-btn"
+                  @click="deleteComment(comment.id, post.id, post.userId)"
+                  title="댓글 삭제"
+              >
+                <i class="bi bi-trash"></i>
+              </button>
+            </li>
+          </ul>
         </div>
         <!-- 하단: 좋아요/댓글/저장 아이콘 -->
         <div class="insta-post-actions">
@@ -138,7 +163,7 @@
         </div>
         <small class="created-at">{{ post.createdAt }}</small>
         <!-- 댓글 입력: 내 프로필 사진 추가 -->
-        <form class="insta-post-comment-form" @submit.prevent="submitComment">
+        <form class="insta-post-comment-form" @submit.prevent="submitComment(post.id, post.userId)">
           <input
               v-model="comment"
               type="text"
@@ -221,6 +246,7 @@ const follows = ref({
 
 const post = ref({
     id: '',
+    userId: '',
     imageUrl: '',
     profilePicture: '',
     username: '',
@@ -229,6 +255,8 @@ const post = ref({
     likeCnt : '',
     isLike : ''
 })
+
+const commentList =  ref([])
 
 
 const photos = ref([]);
@@ -257,7 +285,6 @@ async function handleMyProfile() {
     api.get('/auth/profile'),
     api.get('/auth/photos')
   ]);
-  userStore.setUser(profileRes.data);
   user.value = profileRes.data;
   photos.value = photoRes.data;
 }
@@ -372,7 +399,8 @@ async function goDetail(photoId) {
       params: {userId: userId, id: photoId}
     });
     showDetail.value = true
-    post.value = res.data;
+    post.value = res.data.photoDto;
+    commentList.value = res.data.commentsList;
   } catch (e) {
     msg.value = e.response?.data || '오류 발생!'
   }
@@ -445,9 +473,27 @@ async function toggleLike(photoId) {
 }
 
 
-function submitComment() {
-  comment.value = ''
+async function submitComment(photoId) {
+  try {
+    await api.post("/comment/insertComment",
+        {
+          commentText: comment.value, photoId: photoId
+        });
+    comment.value = ''
+    await goDetail(photoId, )
+  }catch (e) {
+    console.log(e)
+  }
 }
+
+async function deleteComment(commentId, photoId, userId) {
+  if (confirm('정말 이 댓글을 삭제하시겠습니까?')) {
+    await api.delete(`/comment/deleteComment/${commentId}`)
+    // 댓글 삭제 후 최신 댓글 목록 다시 불러오기
+    await goDetail(photoId, userId, false);
+  }
+}
+
 </script>
 
 <style scoped>
@@ -1183,4 +1229,110 @@ button .bi.bi-chat:hover {
   color: #fff !important;   /* 원하는 색상으로 고정 */
   transition: color 0.15s;
 }
+.comment-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.comment-profile-img {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  margin-right: 8px;
+}
+.comment-nickname {
+  font-weight: bold;
+  margin-right: 6px;
+}
+.comment-text {
+  margin-right: 8px;
+}
+.comment-date {
+  color: #aaa;
+  font-size: 0.85em;
+  margin-left: auto;
+}
+.caption-and-comments {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 12px 0;
+}
+.caption-item, .comment-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.comment-profile-img {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  margin-right: 8px;
+}
+.comment-nickname {
+  font-weight: bold;
+  margin-right: 6px;
+}
+.comment-text {
+  margin-right: 8px;
+}
+.comment-date {
+  color: #aaa;
+  font-size: 0.85em;
+  margin-left: auto;
+}
+.caption-and-comments {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 12px 0;
+}
+.caption-item, .comment-item {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 10px;
+  position: relative;
+}
+.comment-profile-img {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  margin-right: 8px;
+  margin-top: 2px;
+}
+.comment-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.comment-nickname {
+  font-weight: bold;
+  margin-right: 6px;
+}
+.comment-text {
+  margin-right: 8px;
+  word-break: break-all;
+}
+.comment-date {
+  color: #aaa;
+  font-size: 0.85em;
+  margin-top: 2px;
+  margin-left: 0; /* 왼쪽 정렬 */
+}
+.delete-comment-btn {
+  background: none;
+  border: none;
+  color: #e1306c;
+  cursor: pointer;
+  font-size: 1.1em;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+  position: absolute;
+  right: 0;
+  top: 10px;
+}
+.delete-comment-btn:hover {
+  opacity: 1;
+  color: #ff1744;
+}
+
 </style>

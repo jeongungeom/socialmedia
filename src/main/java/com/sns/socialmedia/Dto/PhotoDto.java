@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class PhotoDto {
     private int id;
+    private int userId;
     private String imageUrl;
     private String caption;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
@@ -21,4 +22,5 @@ public class PhotoDto {
     private String profilePicture;
     private int likeCnt;
     private int isLike;
+
 }

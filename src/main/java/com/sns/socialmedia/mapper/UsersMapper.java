@@ -2,6 +2,7 @@ package com.sns.socialmedia.mapper;
 
 import com.sns.socialmedia.Dto.PhotoDto;
 import com.sns.socialmedia.Dto.ProfileDto;
+import com.sns.socialmedia.Dto.TotalPhotoDto;
 import com.sns.socialmedia.model.Users;
 import org.apache.ibatis.annotations.Mapper;
 
