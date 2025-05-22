@@ -55,7 +55,9 @@
 import {reactive, ref} from 'vue'
 import { useRouter } from 'vue-router'
 import api from "../api/axios.js";
+import {useUserStore} from "../stores/auth.js";
 
+const userStore = useUserStore();
 const errorMsg = ref(""); // Vue 예시
 const router = useRouter();
 const form = reactive({
@@ -71,13 +73,33 @@ const handleLogin = async () => {
       password: form.password
     });
     const token = loginRes.data.token;
+    parseJwt(token);
     localStorage.setItem('jwt', token);
+    const payload = parseJwt(token)
+
+    userStore.setUser({
+      id: payload.id,
+      username: payload.sub,
+      token
+    })
+    console.log(payload.id)
     await router.push('/feed');
   } catch (e) {
     errorMsg.value = e.response?.data || "로그인에 실패했습니다.";
   }
 };
 
+function parseJwt(token) {
+  const base64Url = token.split('.')[1]
+  const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/')
+  const jsonPayload = decodeURIComponent(
+      atob(base64)
+          .split('')
+          .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+          .join('')
+  )
+  return JSON.parse(jsonPayload)
+}
 
 function register() {
   router.push('/signUp')
