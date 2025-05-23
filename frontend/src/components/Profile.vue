@@ -57,6 +57,7 @@
       <ul class="popup-list">
         <li v-for="f in follows" :key="f.followerId" class="popup-item">
           <img
+              @click="goUserProfile(f.followingId)"
               :src="`/api/auth/image/${f.followerProfilePicture}`"
               alt="프로필"
               class="popup-avatar"
@@ -77,6 +78,7 @@
       <ul class="popup-list">
         <li v-for="f in follows" :key="f.followingId" class="popup-item">
           <img
+              @click="goUserProfile(f.followingId)"
               :src="`/api/auth/image/${f.followingProfilePicture}`"
               alt="프로필"
               class="popup-avatar"
@@ -205,7 +207,7 @@
 
 <script setup>
 
-import {onMounted, ref} from "vue";
+import {onMounted, ref, watch} from "vue";
 import {useRoute, useRouter} from "vue-router";
 import api from "../api/axios.js";
 import {useUserStore} from "../stores/stores.js";
@@ -257,23 +259,41 @@ const post = ref({
 })
 
 const commentList =  ref([])
-
-
 const photos = ref([]);
 
-onMounted(async () => {
+
+watch(() => route.params.id, async (newId) => {
   try {
-    if (!route.params.id) {
-      isMe.value = true;
-      await handleMyProfile();
+    if (!newId) {
+      isMe.value = true
+      await handleMyProfile()
     } else {
-      await handleUserProfile(route.params.id);
-      await isFollow(route.params.id);
+      isMe.value = false
+      await handleUserProfile(newId)
     }
   } catch (error) {
-    handleError(error);
+    handleError(error)
   }
-});
+})
+
+onMounted(async () => {
+  await validateProfile()
+})
+
+
+async function validateProfile() {
+  try {
+    if (!route.params.id) {
+      isMe.value = true
+      await handleMyProfile()
+    } else {
+      isMe.value = false
+      await handleUserProfile(route.params.id)
+    }
+  } catch (error) {
+    handleError(error)
+  }
+}
 
 async function handleMyProfile() {
   const token = localStorage.getItem('jwt');
@@ -388,7 +408,7 @@ function closeFollowings() {
 async function goUserProfile(userId) {
   showFollowers.value = false
   showFollowings.value = false
-  await handleUserProfile(userId);
+  router.push(`/profile/${userId}`)
 }
 
 async function goDetail(photoId) {
@@ -749,6 +769,7 @@ async function deleteComment(commentId, photoId, userId) {
   border-radius: 50%;
   object-fit: cover;
   border: none;
+  cursor:pointer;
 }
 .popup-username {
   font-weight: 500;
