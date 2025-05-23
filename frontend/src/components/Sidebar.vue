@@ -120,7 +120,6 @@ const hasNewAlarm = computed(() => alarms.value.length > 0)
 
 
 onMounted(() => {
-  console.log('test',userStore.id)
   if (userStore.id) {
     eventSource = new EventSource(`/api/notification/subscribe/${userStore.id}`)
 
