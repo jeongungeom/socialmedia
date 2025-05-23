@@ -86,7 +86,7 @@
         </div>
         <ul class="alarm-list">
           <li v-for="alarm in alarms" :key="alarm.id" class="alarm-item">
-            <span class="alarm-message" @click="readNoti(alarm.id)">{{ alarm.message }}</span>
+            <span class="alarm-message" @click="readNoti(alarm.id)">{{ alarm.message + alarm.id }}</span>
             <span class="alarm-date">{{ alarm.createdAt }}</span>
           </li>
         </ul>
@@ -175,7 +175,6 @@ async function readNoti(notiId) {
   try {
     await api.put(`/notification/readNoti/${notiId}`)
     await getAlarmList();
-    alarms.value = []
   } catch (e) {
     console.log(e);
   }
