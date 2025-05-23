@@ -139,7 +139,7 @@
 <script setup>
 import {onMounted, ref} from 'vue'
 import api from "../api/axios.js";
-import {useUserStore} from "../stores/auth.js";
+import {useUserStore} from "../stores/stores.js";
 
 const userStore = useUserStore();
 const showDetail = ref(false);

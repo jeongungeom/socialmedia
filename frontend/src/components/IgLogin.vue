@@ -55,7 +55,7 @@
 import {reactive, ref} from 'vue'
 import { useRouter } from 'vue-router'
 import api from "../api/axios.js";
-import {useUserStore} from "../stores/auth.js";
+import {useUserStore} from "../stores/stores.js";
 
 const userStore = useUserStore();
 const errorMsg = ref(""); // Vue 예시
@@ -73,6 +73,7 @@ const handleLogin = async () => {
       password: form.password
     });
     const token = loginRes.data.token;
+    userStore.setUser({token: loginRes.data.token })
     parseJwt(token);
     localStorage.setItem('jwt', token);
     const payload = parseJwt(token)

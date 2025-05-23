@@ -208,7 +208,7 @@
 import {onMounted, ref} from "vue";
 import {useRoute, useRouter} from "vue-router";
 import api from "../api/axios.js";
-import {useUserStore} from "../stores/auth.js";
+import {useUserStore} from "../stores/stores.js";
 
 const showEditModal = ref(false)
 const editPostData = ref({ id: null, imageUrl: '', caption: '' })
