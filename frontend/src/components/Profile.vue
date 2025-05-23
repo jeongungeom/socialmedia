@@ -57,7 +57,7 @@
       <ul class="popup-list">
         <li v-for="f in follows" :key="f.followerId" class="popup-item">
           <img
-              @click="goUserProfile(f.followingId)"
+              @click="goUserProfile(f.followerId)"
               :src="`/api/auth/image/${f.followerProfilePicture}`"
               alt="프로필"
               class="popup-avatar"
