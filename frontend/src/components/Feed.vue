@@ -15,6 +15,7 @@
                   class="rounded-circle me-2"
                   width="40"
                   height="40"
+                  @click="goPage(post.userId)"
               >
               <strong>{{ post.username }}</strong>
             </div>
@@ -71,16 +72,16 @@
       <div class="insta-post-info">
         <!-- 상단: 프로필/닉네임/옵션 -->
         <div class="insta-post-header">
-          <img :src="`/api/auth/image/${photoOne.profilePicture}`" class="profile-img" alt="프로필" />
-          <span class="nickname">{{ photoOne.username }}</span>
+          <img @click="goPage(photoOne.userId)" :src="`/api/auth/image/${photoOne.profilePicture}`"  class="profile-img" alt="프로필" />
+          <span @click="goPage(photoOne.userId)" class="nickname" >{{ photoOne.username }}</span>
         </div>
         <div class="header-divider"></div>
         <div class="insta-post-content">
           <ul class="caption-and-comments">
             <li class="caption-item">
-              <img :src="`/api/auth/image/${photoOne.profilePicture}`" class="comment-profile-img" alt="프로필" />
+              <img @click="goPage(photoOne.userId)" :src="`/api/auth/image/${photoOne.profilePicture}`" class="comment-profile-img" alt="프로필" />
               <div class="comment-content">
-                <span class="comment-nickname">{{ photoOne.username }}</span>
+                <span @click="goPage(photoOne.userId)" class="comment-nickname">{{ photoOne.username }}</span>
                 <span class="comment-text">{{ photoOne.caption }}</span>
               </div>
             </li>
@@ -140,10 +141,12 @@
 import {onMounted, ref} from 'vue'
 import api from "../api/axios.js";
 import {useUserStore} from "../stores/stores.js";
+import { useRouter } from 'vue-router'
 
 const userStore = useUserStore();
 const showDetail = ref(false);
 const comment = ref('');
+const router = useRouter()
 const posts = ref([
 
 ])
@@ -234,6 +237,10 @@ async function deleteComment(commentId, photoId, userId) {
   }
 }
 
+function goPage(id) {
+  router.push(`/profile/${id}`)
+}
+
 </script>
 
 <style scoped>
@@ -257,6 +264,7 @@ async function deleteComment(commentId, photoId, userId) {
   background: #000 !important;
   border-bottom: none;
   color: #eee;
+  cursor: pointer;
 }
 
 .card-text {
@@ -311,6 +319,7 @@ async function deleteComment(commentId, photoId, userId) {
   align-items: center;
   gap: 12px;
   margin-bottom: 18px;
+  cursor: pointer;
 }
 .profile-img {
   width: 38px;
@@ -503,10 +512,12 @@ button .bi.bi-chat:hover {
   height: 28px;
   border-radius: 50%;
   margin-right: 8px;
+  cursor: pointer;
 }
 .comment-nickname {
   font-weight: bold;
   margin-right: 6px;
+  cursor: pointer;
 }
 .comment-text {
   margin-right: 8px;
