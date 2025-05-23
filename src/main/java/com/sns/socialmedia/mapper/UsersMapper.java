@@ -23,4 +23,5 @@ public interface UsersMapper {
     Optional<Users> findByUsernameNotMe(Users users); // username으로 사용자 조회
     Optional<Users> findByEmail(String email); // 이메일로 사용자 조회 (비밀번호 재설정 시 사용)
     List<Users> searchByUsername(Long id, String keyword); // 사용자 검색
+    String getUsernameById(Long id);
 }

@@ -11,25 +11,30 @@
                 RECEIVER_ID,
                 SENDER_ID,
                 TYPE,
-                MESSAGE,
-                IS_READ,
-                CREATED_AT
+                MESSAGE
              ) VALUES
                 (
                  #{receiverId},
                  #{senderId},
                  #{type},
-                 #{message},
-                 #{isRead},
-                 #{createdAt}
+                 #{message}
                 )
     </insert>
-    <delete id="deleteNotifications" parameterType="int">
-        DELETE FROM Notifications WHERE ID = #{id}
-    </delete>
-    <select id="selectNotifications" resultType="Notifications">
+    <update id="updateNotifications" parameterType="long">
+        UPDATE NOTIFICATIONS
+                            SET IS_READ = 1
+        WHERE ID = #{id}
+    </update>
+    <select id="getNotificationList" resultType="Notifications">
         SELECT ID, RECEIVER_ID, SENDER_ID, TYPE, MESSAGE, IS_READ, CREATED_AT
         FROM Notifications
         WHERE RECEIVER_ID = #{receiverId}
+        AND IS_READ != 1
+        ORDER BY CREATED_AT DESC
     </select>
+    <update id="deleteAllNoti" parameterType="long">
+        UPDATE NOTIFICATIONS
+                            SET IS_READ = 1
+        WHERE RECEIVER_ID = #{receiverId}
+    </update>
 </mapper>

@@ -59,4 +59,10 @@
 
     </select>
 
+    <select id="getUserIdByPhotoId" parameterType="Long" resultType="int">
+        SELECT USER_ID
+        FROM PHOTOS
+        WHERE id = #{photoId}
+    </select>
+
 </mapper>

@@ -111,4 +111,9 @@
           AND ID != #{id}
         LIMIT 20
     </select>
+    <select id="getUsernameById" parameterType="long" resultType="String">
+        SELECT USERNAME
+        FROM USERS
+        WHERE ID = #{id}
+    </select>
 </mapper>

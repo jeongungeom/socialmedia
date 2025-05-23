@@ -167,4 +167,8 @@ public class UsersService {
     public List<Users> searchByUsername(Long id, String keyword) {
         return usersMapper.searchByUsername(id, keyword);
     }
+
+    public String getUsernameById(Long id) {
+        return usersMapper.getUsernameById(id);
+    }
 }

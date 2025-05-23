@@ -1,6 +1,7 @@
 package com.sns.socialmedia.model;
 
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.sns.socialmedia.enums.NotificationType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,6 +21,7 @@ public class Notifications {
     private String type;
     private String message;
     private boolean isRead;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDateTime createdAt;
 
     public void save(Long receiverId, Long senderId, NotificationType type, String message) {

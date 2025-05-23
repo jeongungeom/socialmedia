@@ -8,6 +8,7 @@ import java.util.List;
 @Mapper
 public interface NotificationsMapper {
     void insertNotifications(Notifications notifications);
-    void deleteNotifications(Long id);
-    List<Notifications> selectNotifications(Long receiverId);
+    void updateNotifications(Long id);
+    List<Notifications> getNotificationList(Long receiverId);
+    void deleteAllNoti(Long receiverId);
 }

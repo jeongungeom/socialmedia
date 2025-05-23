@@ -1,7 +1,7 @@
 <template>
   <nav class="sidebar">
-    <div class="sidebar-logo mb-5">
-      <i class="bi bi-instagram" style="font-size:2rem; color:#e1306c;"></i>
+    <div class="sidebar-logo mb-5" @click="goFeed">
+      <i  class="bi bi-instagram" style="font-size:2rem; color:#e1306c;"></i>
     </div>
     <ul class="nav flex-column gap-3">
       <li><a href="#" class="nav-link" @click="goFeed"><i class="bi bi-house-door me-3"></i>홈</a></li>
@@ -10,7 +10,7 @@
           <i class="bi bi-search me-3"></i>검색
         </a>
       </li>
-      <li><a href="#" class="nav-link"><i class="bi bi-heart me-3"></i>알림</a></li>
+      <li><a href="#" class="nav-link" @click="getAlarmList"><i class="bi bi-heart me-3"></i>알림</a></li>
       <li><a href="#" class="nav-link" @click="goPost"><i class="bi bi-plus-square me-3"></i>포스팅</a></li>
       <li><a href="#" class="nav-link" @click="goProfile"><i class="bi bi-person-circle me-3"></i>프로필</a></li>
     </ul>
@@ -47,6 +47,44 @@
     </transition>
     <div v-if="showSearchPanel" class="ig-search-overlay" @click="closeSearchPanel"></div>
   </nav>
+  <div>
+    <!-- 사이드바 알림 아이콘 -->
+    <button class="sidebar-icon" @click="showAlarm = true">
+      <i class="bi bi-bell"></i>
+    </button>
+
+    <!-- 알람 슬라이드 패널 -->
+    <transition name="slide-left">
+      <div v-if="showAlarm" class="alarm-sidebar">
+        <div class="alarm-header">
+          <div class="alarm-title-group">
+            <span>알림</span>
+            <button
+                class="all-read-btn"
+                @click="readAll"
+                :disabled="alarms.length === 0"
+                title="전체 확인"
+            >
+              <i class="bi bi-bell-fill"></i>
+            </button>
+          </div>
+          <button class="close-btn" @click="showAlarm = false" title="닫기">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+        <ul class="alarm-list">
+          <li v-for="alarm in alarms" :key="alarm.id" class="alarm-item">
+            <span class="alarm-message" @click="readNoti(alarm.id)">{{ alarm.message }}</span>
+            <span class="alarm-date">{{ alarm.createdAt }}</span>
+          </li>
+        </ul>
+        <div v-if="alarms.length === 0" class="alarm-empty">
+          새로운 알림이 없습니다.
+        </div>
+      </div>
+    </transition>
+    <div v-if="showAlarm" class="alarm-overlay" @click="showAlarm = false"></div>
+  </div>
 </template>
 
 <script setup>
@@ -59,6 +97,9 @@ const router = useRouter()
 const showSearchPanel = ref(false)
 const searchQuery = ref('')
 const searchResults = ref([])
+const showAlarm = ref(false);
+
+const alarms = ref([])
 
 let debounceTimer = null
 
@@ -82,10 +123,35 @@ watch(searchQuery, (newVal) => {
   }, 400)
 })
 
-const form = ref({
-  id: '',
-  keyword: ''
-})
+async function getAlarmList() {
+  try {
+    const res = await api.get('/notification/getNoti')
+    alarms.value = res.data;
+    showAlarm.value = true;
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+async function readNoti(notiId) {
+  try {
+    await api.put(`/notification/readNoti/${notiId}`)
+    await getAlarmList();
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+async function readAll() {
+  try {
+    await api.put('/notification/deleteAllNoti')
+    await getAlarmList();
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+
 
 function goProfile() {
   router.push('/profile');
@@ -134,6 +200,7 @@ function closeSearchPanel() {
 .sidebar-logo {
   margin-bottom: 2rem;
   text-align: left;
+  cursor: pointer;
 }
 .nav-link {
   color: #bbb !important;
@@ -208,4 +275,124 @@ function closeSearchPanel() {
     padding: 24px 10px;
   }
 }
+/* 알람 사이드바 */
+.alarm-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 340px;
+  height: 100vh;
+  background: #222;
+  box-shadow: 2px 0 16px rgba(0,0,0,0.15);
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+}
+
+.alarm-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 18px 12px 18px;
+  border-bottom: 1px solid #333;
+  font-size: 1.2em;
+  font-weight: bold;
+  color: #fff;
+}
+
+/* 추가: 알림 글자와 종 버튼 묶음 */
+.alarm-title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.alarm-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.all-read-btn {
+  background: none;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2em;
+  color: #ffcc33;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s;
+  padding: 0;
+}
+.all-read-btn:disabled {
+  color: #888;
+  cursor: not-allowed;
+  background: none;
+}
+.all-read-btn:not(:disabled):hover {
+  background: #333;
+  color: #ffe066;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.4em;
+  cursor: pointer;
+  color: #fff;
+  padding: 0 2px;
+  transition: color 0.18s;
+}
+.close-btn:hover {
+  color: #ffcc33;
+}
+
+.alarm-list {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 12px 0;
+  margin: 0;
+  list-style: none;
+}
+
+.alarm-item {
+  padding: 12px 20px;
+  border-bottom: 1px solid #333;
+  font-size: 1em;
+  display: flex;
+  flex-direction: column;
+  color: #fff;
+  cursor: pointer;
+}
+.alarm-message {
+  margin-bottom: 4px;
+}
+.alarm-date {
+  color: #ffec99;
+  font-size: 0.92em;
+}
+.alarm-empty {
+  text-align: center;
+  color: #aaa;
+  padding: 40px 0;
+  font-size: 1.1em;
+}
+.alarm-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.3);
+  z-index: 1999;
+}
+.sidebar-icon {
+  background: none;
+  border: none;
+  font-size: 1.5em;
+  cursor: pointer;
+  color: #fff;
+}
+
 </style>

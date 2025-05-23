@@ -16,4 +16,5 @@ public interface PhotosMapper {
     int updatePhotos(Photos photo); // 게시물 수정
     int deletePhotos(Long userId, Long id); // 게시물 삭제
     int countByUserId(Long userId); // 사용자의 게시물 수 조회
+    int getUserIdByPhotoId(Long photoId);
 }

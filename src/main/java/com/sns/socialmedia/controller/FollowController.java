@@ -6,6 +6,7 @@ import com.sns.socialmedia.model.Follows;
 import com.sns.socialmedia.model.Notifications;
 import com.sns.socialmedia.service.FollowsService;
 import com.sns.socialmedia.service.NotificationsService;
+import com.sns.socialmedia.service.UsersService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,15 +23,15 @@ public class FollowController {
     private NotificationType notificationType;
 
     private final FollowsService followsService;
-
     private final NotificationsService notificationsService;
-
+    private final UsersService usersService;
     @PostMapping("/{userId}")
     public void follow(@PathVariable Long userId, HttpServletRequest request) {
         Long myId = (Long) request.getAttribute("id");
         Notifications notifications = new Notifications();
+        String username = usersService.getUsernameById(myId);
 
-        notifications.save(userId, myId, NotificationType.FOLLOW, "님이 당신을 팔로우 했습니다.");
+        notifications.save(userId, myId, NotificationType.FOLLOW, username+"님이 당신을 팔로우 했습니다.");
         notificationsService.insertNotification(notifications);
         followsService.follow(myId, userId);
     }

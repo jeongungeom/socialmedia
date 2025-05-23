@@ -50,4 +50,8 @@ public class PhotoService {
         return photosMapper.countByUserId(userId);
     }
 
+    public int getUserIdByPhotoId(Long photoId) {
+        return photosMapper.getUserIdByPhotoId(photoId);
+    }
+
 }
