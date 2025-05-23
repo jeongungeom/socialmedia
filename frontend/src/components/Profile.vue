@@ -278,6 +278,7 @@ watch(() => route.params.id, async (newId) => {
 
 onMounted(async () => {
   await validateProfile()
+  await isFollow(route.params.id);
 })
 
 
