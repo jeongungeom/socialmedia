@@ -10,7 +10,19 @@
           <i class="bi bi-search me-3"></i>검색
         </a>
       </li>
-      <li><a href="#" class="nav-link" @click="getAlarmList"><i class="bi bi-heart me-3"></i>알림</a></li>
+      <li>
+        <a href="#" class="nav-link" @click="openAlarm" style="position: relative;">
+    <span class="icon-wrapper">
+      <i class="bi bi-heart me-3"></i>
+      <span
+          v-if="hasNewAlarm"
+          class="alarm-badge"
+          aria-label="새 알림"
+      ></span>
+    </span>
+          알림
+        </a>
+      </li>
       <li><a href="#" class="nav-link" @click="goPost"><i class="bi bi-plus-square me-3"></i>포스팅</a></li>
       <li><a href="#" class="nav-link" @click="goProfile"><i class="bi bi-person-circle me-3"></i>프로필</a></li>
     </ul>
@@ -89,19 +101,45 @@
 
 <script setup>
 
-import { ref, watch} from "vue";
+import {computed, onMounted, ref, watch} from "vue";
 import { useRouter } from 'vue-router'
 import api from "../api/axios.js";
+import {useUserStore} from "../stores/stores.js";
 
 const router = useRouter()
 const showSearchPanel = ref(false)
 const searchQuery = ref('')
 const searchResults = ref([])
 const showAlarm = ref(false);
-
+const userStore = useUserStore()
 const alarms = ref([])
-
+let eventSource = null
 let debounceTimer = null
+
+const hasNewAlarm = computed(() => alarms.value.length > 0)
+
+
+onMounted(() => {
+  console.log('test',userStore.id)
+  if (userStore.id) {
+    eventSource = new EventSource(`/api/notification/subscribe/${userStore.id}`)
+
+    eventSource.addEventListener('alarm', (event) => {
+      const data = JSON.parse(event.data)
+      alarms.value.unshift({
+        id: data.id,
+        message: data.message,
+        createdAt: new Date().toLocaleString()
+      })
+    })
+
+    eventSource.onerror = () => {
+      eventSource.close()
+    }
+  }
+})
+
+
 
 watch(searchQuery, (newVal) => {
   if (!newVal) {
@@ -137,6 +175,7 @@ async function readNoti(notiId) {
   try {
     await api.put(`/notification/readNoti/${notiId}`)
     await getAlarmList();
+    alarms.value = []
   } catch (e) {
     console.log(e);
   }
@@ -146,6 +185,7 @@ async function readAll() {
   try {
     await api.put('/notification/deleteAllNoti')
     await getAlarmList();
+    alarms.value = []
   } catch (e) {
     console.log(e);
   }
@@ -176,6 +216,10 @@ function closeSearchPanel() {
   showSearchPanel.value = false
   searchQuery.value = ''
   searchResults.value = []
+}
+
+function openAlarm() {
+  showAlarm.value = true;
 }
 
 
@@ -393,6 +437,25 @@ function closeSearchPanel() {
   font-size: 1.5em;
   cursor: pointer;
   color: #fff;
+}
+.icon-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.alarm-badge {
+  position: absolute;
+  top: 0px;
+  right: 11px;
+  width: 10px;
+  height: 10px;
+  background: #ff3b3b;
+  border-radius: 50%;
+  border: 1.5px solid #fff;
+  box-shadow: 0 0 2px rgba(0,0,0,0.15);
+  display: inline-block;
+  z-index: 10;
+  pointer-events: none;
 }
 
 </style>

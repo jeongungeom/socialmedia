@@ -5,7 +5,7 @@
 
 <mapper namespace="com.sns.socialmedia.mapper.NotificationsMapper">
 
-    <insert id="insertNotifications" parameterType="Notifications">
+    <insert id="insertNotifications" parameterType="Notifications" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO Notifications
             (
                 RECEIVER_ID,

@@ -1,5 +1,6 @@
 package com.sns.socialmedia.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sns.socialmedia.mapper.NotificationsMapper;
 import com.sns.socialmedia.model.Notifications;
 import lombok.RequiredArgsConstructor;
@@ -7,7 +8,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
@@ -47,14 +50,24 @@ public class NotificationsService {
     public void sendNotification(Long receiverId, String message, Notifications notifications) {
         // 1. 알림 DB에 저장 (생략 or 구현)
         notificationsMapper.insertNotifications(notifications);
+
+        Map<String, Object> alarmData = new HashMap<>();
+        Long notificationId = notifications.getId();
+        alarmData.put("id", notificationId);
+        alarmData.put("message", message);
+        alarmData.put("createdAt", notifications.getCreatedAt());
+
         // 2. 실시간 알림 전송
-        SseEmitter emitter = emitters.get(receiverId);
-        if (emitter != null) {
-            try {
-                emitter.send(SseEmitter.event().name("alarm").data(message));
-            } catch (IOException e) {
-                emitters.remove(receiverId);
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            String json = objectMapper.writeValueAsString(alarmData);
+
+            SseEmitter emitter = emitters.get(receiverId);
+            if (emitter != null) {
+                emitter.send(SseEmitter.event().name("alarm").data(json));
             }
+        } catch (Exception e) {
+            emitters.remove(receiverId);
         }
     }
 }

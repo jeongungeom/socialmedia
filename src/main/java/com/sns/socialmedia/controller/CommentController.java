@@ -34,7 +34,8 @@ public class CommentController {
         String username = usersService.getUsernameById(myId);
         if(myId != userId) {
             notifications.save((long) userId, myId, NotificationType.COMMENT, username+"님이 댓글을 남겼습니다."+comments.getCommentText());
-            notificationsService.insertNotification(notifications);
+            notificationsService.sendNotification((long) userId, username+"님이 댓글을 남겼습니다."+comments.getCommentText(), notifications);
+//            notificationsService.insertNotification(notifications);
         }
         commentsService.insertComment(comments);
     }

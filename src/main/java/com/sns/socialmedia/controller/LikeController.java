@@ -35,7 +35,8 @@ public class LikeController {
 
         if(myId != userId) {
             notifications.save((long) userId, myId, NotificationType.LIKE, username+"님이 회원님의 사진을 좋아합니다.");
-            notificationsService.insertNotification(notifications);
+            notificationsService.sendNotification((long) userId, username+"님이 회원님의 사진을 좋아합니다.", notifications);
+//            notificationsService.insertNotification(notifications);
         }
         likesService.insertLike(likes);
     }

@@ -32,7 +32,8 @@ public class FollowController {
         String username = usersService.getUsernameById(myId);
 
         notifications.save(userId, myId, NotificationType.FOLLOW, username+"님이 당신을 팔로우 했습니다.");
-        notificationsService.insertNotification(notifications);
+        notificationsService.sendNotification((long) userId, username+"님이 당신을 팔로우 했습니다.", notifications);
+//        notificationsService.insertNotification(notifications);
         followsService.follow(myId, userId);
     }
 

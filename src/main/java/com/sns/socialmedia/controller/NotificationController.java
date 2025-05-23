@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.List;
 
@@ -34,5 +35,10 @@ public class NotificationController {
     public void deleteAllNoti(HttpServletRequest request) {
         Long myId = (Long) request.getAttribute("id");
         notificationsService.deleteAllNoti(myId);
+    }
+
+    @GetMapping("/subscribe/{userId}")
+    public SseEmitter subscribe(@PathVariable Long userId) {
+        return notificationsService.subscribe(userId);
     }
 }
