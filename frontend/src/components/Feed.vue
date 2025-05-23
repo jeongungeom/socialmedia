@@ -192,8 +192,7 @@ async function goDetail(photoId, userId, valid) {
 
 async function toggleLike(photoId) {
   const post = posts.value.find(p => p.id === photoId)
-
-  if (post.isLike) {
+  if (post.isLike > 0) {
     // 좋아요 취소
     post.isLike = false
     photoOne.value.isLike = false;

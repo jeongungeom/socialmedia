@@ -459,7 +459,7 @@ async function submitEdit() {
 }
 
 async function toggleLike(photoId) {
-  if (post.isLike) {
+  if (post.value.isLike > 0) {
     // 좋아요 취소
     post.isLike = false
     await api.delete(`/like/deleteLike/${photoId}`, )
