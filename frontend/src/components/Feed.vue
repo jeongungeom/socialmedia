@@ -238,6 +238,9 @@ async function deleteComment(commentId, photoId, userId) {
 }
 
 function goPage(id) {
+  if(userStore.id === id) {
+    router.push('/profile');
+  }
   router.push(`/profile/${id}`)
 }
 
