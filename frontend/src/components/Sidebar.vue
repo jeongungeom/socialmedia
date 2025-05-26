@@ -86,7 +86,7 @@
         </div>
         <ul class="alarm-list">
           <li v-for="alarm in alarms" :key="alarm.id" class="alarm-item">
-            <span class="alarm-message" @click="readNoti(alarm.id)">{{ alarm.message + alarm.id }}</span>
+            <span class="alarm-message" @click="readNoti(alarm.id)">{{ alarm.message }}</span>
             <span class="alarm-date">{{ alarm.createdAt }}</span>
           </li>
         </ul>
